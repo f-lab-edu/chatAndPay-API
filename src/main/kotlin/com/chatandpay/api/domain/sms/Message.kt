@@ -8,5 +8,5 @@ import lombok.*
 data class Message(
     val to: String,
     val subject: String?,
-    val content: String,
+    var content: String,
 )
