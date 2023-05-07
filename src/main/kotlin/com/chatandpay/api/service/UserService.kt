@@ -30,8 +30,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
 
-        val encodedPassword = passwordEncoder.encode(user.password)
-        val regUser = User(name = user.name, password = encodedPassword, userId= "", cellphone = user.cellphone)
+        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone)
         return userRepository.save(regUser)
     }
 
