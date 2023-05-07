@@ -85,13 +85,22 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
 
-        findUser.userId = userRequest.userId ?: findUser.userId
+        val isIdRegistered = !findUser.userId.isNullOrEmpty() && !findUser.password.isNullOrEmpty()
+        val canRegIdAndPw = !userRequest.userId.isNullOrEmpty() && !userRequest.password.isNullOrEmpty()
 
-        if(!userRequest.password.isNullOrEmpty()) {
-            val encodedPassword = passwordEncoder.encode(userRequest.password)
-            findUser.password = encodedPassword
+        val encodedPassword = passwordEncoder.encode(userRequest.password)
+
+        if(!isIdRegistered){
+            if(!canRegIdAndPw) {
+                throw IllegalArgumentException("ID / 패스워드는 동시에 등록되어야 합니다.")
+            } else {
+                findUser.userId = userRequest.userId
+                findUser.password = encodedPassword
+            }
         } else {
-            findUser.password = findUser.password
+            if(userRequest.password.isNullOrEmpty()) {
+                findUser.password = encodedPassword
+            }
         }
 
         findUser.cellphone = userRequest.cellphone
