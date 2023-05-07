@@ -1,9 +1,13 @@
 package com.chatandpay.api.domain
 
+import lombok.AllArgsConstructor
+import lombok.NoArgsConstructor
 import javax.persistence.*
 
 @Entity
 @Table(name = "member")
+@AllArgsConstructor
+@NoArgsConstructor
 data class User (
 
     @Id

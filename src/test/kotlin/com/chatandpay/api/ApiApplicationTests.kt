@@ -1,7 +1,9 @@
 package com.chatandpay.api
 
+import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.Message
 import com.chatandpay.api.service.SmsService
+import com.chatandpay.api.service.UserService
 import com.fasterxml.jackson.core.JsonProcessingException
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +21,9 @@ class ApiApplicationTests {
 	@Autowired
 	private val smsService: SmsService? = null
 
+	@Autowired
+	private val userService: UserService? = null
+
 	@Test
 	@Throws(
 		JsonProcessingException::class,
@@ -28,10 +33,19 @@ class ApiApplicationTests {
 		NoSuchAlgorithmException::class,
 		InvalidKeyException::class
 	)
-
 	fun sendSms() {
-		val message = Message("01072808790", null, "메시지 테스트ㅋ")
+		val message = Message("01072808790", null, "메시지 전송 테스트")
 		smsService!!.sendSms(message)
+	}
+	@Test
+	fun authSendSms() {
+		smsService!!.authSendSms("01072808790")
+	}
+
+	@Test
+	fun authLoginConfirm() {
+		val testUser = userService!!.login(User(userId = "idid23", name="고로케케22", cellphone = "01072808790", password = "12234"))
+		userService.authLoginConfirm(testUser!!, "421315")
 	}
 
 	@Test

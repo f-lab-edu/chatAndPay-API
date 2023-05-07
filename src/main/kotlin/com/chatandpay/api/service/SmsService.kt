@@ -1,8 +1,11 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.sms.Message
+import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.domain.sms.SmsRequest
 import com.chatandpay.api.domain.sms.SmsResponse
+import com.chatandpay.api.repository.AuthRepository
+import com.chatandpay.api.utils.RandomUtil
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
@@ -18,13 +21,17 @@ import java.net.URI
 import java.net.URISyntaxException
 import java.security.InvalidKeyException
 import java.security.NoSuchAlgorithmException
+import java.time.Duration
+import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.TimeoutException
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
+import javax.transaction.Transactional
 
 
 @Service
-class SmsService {
+class SmsService(private val authRepository: AuthRepository) {
 
     @Value("\${sens.accessKey}")
     private val accessKey: String? = null
@@ -36,8 +43,39 @@ class SmsService {
     private val serviceId: String? = null
 
     @Value("\${sens.senderPhone}")
-    private val phone: String? = null
+    private val senderPhone: String? = null
 
+
+    @Transactional
+    fun authSendSms(cellphone: String): SmsResponse? {
+
+        val sixDigits = RandomUtil.generateRandomSixDigits()
+        val content = "인증 번호는 [${sixDigits}]입니다."
+        val message = Message(cellphone,null, content)
+        val smsAuth = SmsAuthentication(null, sixDigits, cellphone, LocalDateTime.now())
+        authRepository.save(smsAuth)
+
+        return sendSms(message)
+    }
+
+    @Transactional
+    fun authSendSmsConfirm(smsAuth : SmsAuthentication) {
+
+        val now = LocalDateTime.now()
+        val duration = Duration.between(smsAuth.requestTime, now)
+
+        if(duration.toMinutes() <= 3) {
+
+            smsAuth.isVerified = true
+            smsAuth.confirmTime = now
+
+            authRepository.save(smsAuth)
+
+        } else {
+            throw TimeoutException("요청 시간이 3분을 초과했습니다.")
+        }
+
+    }
 
     @Throws(
         JsonProcessingException::class,
@@ -60,7 +98,7 @@ class SmsService {
         val messages: MutableList<Message> = ArrayList()
         messages.add(message)
 
-        val request = phone?.let {
+        val request = senderPhone?.let {
             SmsRequest(
                 type = "SMS",
                 contentType = "COMM",
