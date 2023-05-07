@@ -30,7 +30,17 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
 
-        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone)
+        val authData = authRepository.findById(user.verificationId) ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
+
+        if (authData.phoneNumber != user.cellphone) {
+            throw IllegalArgumentException("인증을 요청한 휴대폰 번호와 가입 요청 휴대폰 번호가 다릅니다.")
+        }
+
+        if (!authData.isVerified) {
+            throw IllegalArgumentException("휴대폰 인증이 진행되지 않았습니다.")
+        }
+
+        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId)
         return userRepository.save(regUser)
     }
 
@@ -46,6 +56,15 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
         }
 
+    }
+
+    fun authJoin(user: User): Long? {
+
+        if (userRepository.findByCellphone(user.cellphone) != null)  {
+            throw IllegalArgumentException("해당 휴대전화번호로 가입된 사용자가 있습니다.")
+        }
+
+        return smsService.authSendSms(user.cellphone)
     }
 
     fun authLogin(user : User): User? {

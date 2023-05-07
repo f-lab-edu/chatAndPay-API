@@ -37,6 +37,18 @@ class UserController(val userService: UserService) {
         return ResponseEntity.ok("ok")
     }
 
+    @PostMapping("/authJoin")
+    fun authJoinUser(@RequestBody user: User): ResponseEntity<Any> {
+
+        try {
+            userService.authJoin(user)
+        } catch(e: Exception) {
+            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
+        }
+
+        return ResponseEntity.ok("ok")
+    }
+
     @PostMapping("/authConfirm")
     fun confirmAuthLoginUser(@RequestBody saveObj : ObjectNode): ResponseEntity<Any> {
 
