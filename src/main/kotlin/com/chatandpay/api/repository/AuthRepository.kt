@@ -26,4 +26,10 @@ class AuthRepository {
         return query.resultList.lastOrNull()
     }
 
+    fun findById(id: Long) :  SmsAuthentication? {
+        val query = entityManager.createQuery("SELECT a FROM SmsAuthentication a WHERE a.id = :id", SmsAuthentication::class.java)
+        query.setParameter("id", id)
+        return query.resultList.lastOrNull()
+    }
+
 }

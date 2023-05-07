@@ -22,6 +22,8 @@ data class User (
     var password: String? = null,
     @Column(nullable = false)
     var name: String,
+    @Column(nullable = false)
+    var verificationId: Long,
 
 )
 

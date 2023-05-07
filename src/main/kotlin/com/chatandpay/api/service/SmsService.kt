@@ -46,16 +46,20 @@ class SmsService(private val authRepository: AuthRepository) {
     private val senderPhone: String? = null
 
 
+    @Throws(RuntimeException::class)
     @Transactional
-    fun authSendSms(cellphone: String): SmsResponse? {
+    fun authSendSms(cellphone: String): Long {
 
         val sixDigits = RandomUtil.generateRandomSixDigits()
         val content = "인증 번호는 [${sixDigits}]입니다."
         val message = Message(cellphone,null, content)
-        val smsAuth = SmsAuthentication(null, sixDigits, cellphone, LocalDateTime.now())
-        authRepository.save(smsAuth)
 
-        return sendSms(message)
+        val smsAuth = SmsAuthentication(null, sixDigits, cellphone, LocalDateTime.now())
+
+        val auth = authRepository.save(smsAuth)
+        sendSms(message) ?: throw RuntimeException("메시지 발송 실패")
+
+        return auth?.id ?: throw RuntimeException("메시지 정보 저장 실패")
     }
 
     @Transactional
