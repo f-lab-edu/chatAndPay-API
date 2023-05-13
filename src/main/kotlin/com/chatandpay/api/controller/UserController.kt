@@ -91,7 +91,7 @@ class UserController(val userService: UserService) {
 
 
     @DeleteMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long): ResponseEntity<Any> {
+    fun deleteUser(@PathVariable("id") id: Long): ResponseEntity<Any> {
 
         try {
             userService.deleteUser(id)
