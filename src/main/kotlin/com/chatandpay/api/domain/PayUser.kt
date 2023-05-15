@@ -20,6 +20,7 @@ data class PayUser(
     @JoinColumn(name = "user_id")
     val user: User,
     val userSeqNo: String,
+    val birthDate: String,
     @OneToOne(mappedBy = "payUser", cascade = [CascadeType.ALL])
     var wallet: Wallet? = null
 )
