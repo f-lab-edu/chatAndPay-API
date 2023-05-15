@@ -1,8 +1,14 @@
 package com.chatandpay.api.service
 
+import com.chatandpay.api.controller.dto.InquiryRealNameDTO
 import com.chatandpay.api.domain.AccessToken
 import com.chatandpay.api.repository.AccessTokenRepository
+import com.chatandpay.api.repository.PayUserRepository
+import com.chatandpay.api.service.dto.RealNameInquiryResponseDTO
 import com.chatandpay.api.service.dto.OpenApiAccessTokenDTO
+import com.chatandpay.api.utils.RandomUtil
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -10,12 +16,14 @@ import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
 import org.springframework.web.client.RestTemplate
 import java.net.URI
+import java.nio.charset.Charset
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import javax.transaction.Transactional
 
 @Service
-class OpenApiService(val accessTokenRepository: AccessTokenRepository) {
+class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUserRepository: PayUserRepository) {
 
     @Value("\${openapi.clientId}")
     val clientId: String? = null
@@ -25,6 +33,10 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository) {
 
     @Value("\${openapi.url}")
     val url: String? = null
+
+    @Value("\${openapi.institutionCode}")
+    val institutionCode: String? = null
+
 
     @Transactional
     fun getOpenApiAccessToken() : AccessToken? {
@@ -67,5 +79,35 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository) {
         }
 
         return token
+    }
+
+    fun getInquiryRealName(inquiryDto : InquiryRealNameDTO) : RealNameInquiryResponseDTO {
+
+        val rest = RestTemplate()
+        val uri = URI.create("$url/v2.0/inquiry/real_name")
+
+        val token = getOpenApiAccessToken()?.accessToken
+
+        val headers = HttpHeaders()
+        headers.set("Authorization", "Bearer$token")
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.acceptCharset = listOf(Charset.forName("UTF-8"))
+
+        inquiryDto.bankTranId =  institutionCode + "U" + RandomUtil.generateRandomNineDigits()
+        inquiryDto.accountHolderInfo = payUserRepository.findById(inquiryDto.payUserId.toLong())?.birthDate?.substring(2,8) ?: throw IllegalAccessException("회원 조회 실패")
+        inquiryDto.tranDtime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")).toString()
+
+
+        val objectMapper = ObjectMapper().apply {
+            propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+        }
+        val jsonBody = objectMapper.writeValueAsString(inquiryDto)
+
+        return rest.postForObject(
+            uri,
+            HttpEntity(jsonBody, headers),
+            RealNameInquiryResponseDTO::class.java
+            // TODO - 타 응답 반환 시 ResponceDTO 처리
+        ) ?: throw RuntimeException("조회 실패")
     }
 }
