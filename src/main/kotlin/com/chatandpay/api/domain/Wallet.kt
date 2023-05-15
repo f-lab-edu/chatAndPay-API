@@ -17,4 +17,8 @@ data class Wallet(
     @OneToOne
     @JoinColumn(name = "pay_user_id")
     val payUser: PayUser
-)
+) {
+    override fun toString(): String {
+        return "Wallet(id=$id, money=$money)"
+    }
+}
