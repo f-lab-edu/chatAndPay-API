@@ -23,7 +23,7 @@ class PayUserService(private val payUserRepository: PayUserRepository, private v
         val user = userRepository.findById(payUser.userId)
 
         if(user != null) {
-            val regUser = PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null)
+            val regUser = PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null, birthDate = payUser.birthDate)
             val savedUser = payUserRepository.save(regUser) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
             val wallet = Wallet(money = 0, payUser = savedUser)
             savedUser.wallet = walletRepository.save(wallet) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
