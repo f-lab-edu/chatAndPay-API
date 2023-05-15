@@ -22,7 +22,8 @@ enum class BANK_CODE(private val code: String) {
     신한은행("088"),
     케이뱅크("089"),
     카카오뱅크("090"),
-    토스뱅크("092");
+    토스뱅크("092"),
+    오픈("097"),;
 
     val bankCode: String = code
 }
