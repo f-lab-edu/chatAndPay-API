@@ -23,6 +23,6 @@ data class InquiryRealNameDTO(
     var tranDtime: String,
 
     @JsonProperty("pay_user_id")
-    var payUserId: String
+    var payUserId: Long
 
 )
