@@ -6,6 +6,7 @@ import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.repository.WalletRepository
+import com.chatandpay.api.service.dto.DepositWalletDTO
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
@@ -54,6 +55,14 @@ class PayUserService(private val payUserRepository: PayUserRepository, private v
 
     fun isPayUser(userId: Long): Boolean {
         return payUserRepository.findByUserId(userId) != null
+    }
+
+
+    fun depositintoWallet(depositWallet : DepositWalletDTO, user: PayUser) : PayUser? {
+        val updatesMoney = depositWallet.depositMoney
+        val currentMoney = user.wallet?.money ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        user.wallet?.money = currentMoney + updatesMoney
+        return payUserRepository.save(user)
     }
 
 

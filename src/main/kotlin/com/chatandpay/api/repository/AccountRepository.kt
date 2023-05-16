@@ -16,6 +16,14 @@ class AccountRepository {
         return account
     }
 
+
+    fun findById(id:Long): OtherBankAccount? {
+        val query = entityManager.createQuery("SELECT a FROM OtherBankAccount a WHERE a.id = :id", OtherBankAccount::class.java)
+        query.setParameter("id", id)
+        return query.resultList.lastOrNull()
+    }
+
+
     fun findDuplicatedAccount(account: OtherBankAccount): Boolean {
         val query = entityManager.createQuery("SELECT a FROM OtherBankAccount a WHERE a.bankCode = :bankCode AND a.accountNumber = :accountNumber", OtherBankAccount::class.java)
         query.setParameter("bankCode", account.bankCode)

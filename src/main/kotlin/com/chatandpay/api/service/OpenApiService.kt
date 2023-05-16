@@ -94,12 +94,13 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         headers.acceptCharset = listOf(Charset.forName("UTF-8"))
 
         inquiryDto.bankTranId =  institutionCode + "U" + RandomUtil.generateRandomNineDigits()
-        inquiryDto.accountHolderInfo = payUserRepository.findById(inquiryDto.payUserId.toLong())?.birthDate?.substring(2,8) ?: throw IllegalAccessException("회원 조회 실패")
+        inquiryDto.accountHolderInfo = payUserRepository.findById(inquiryDto.payUserId)?.birthDate?.substring(2,8) ?: throw IllegalAccessException("회원 조회 실패")
         inquiryDto.tranDtime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")).toString()
 
 
         val objectMapper = ObjectMapper().apply {
             propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+            // TODO - SNAKE_CASE 변경 필요
         }
         val jsonBody = objectMapper.writeValueAsString(inquiryDto)
 
@@ -110,4 +111,15 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
             // TODO - 타 응답 반환 시 ResponceDTO 처리
         ) ?: throw RuntimeException("조회 실패")
     }
+
+    fun withdrawMoney(chargeMoney: Int) : Int {
+
+        val rest = RestTemplate()
+        val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
+
+        // TODO token 종류 상이함으로 인한 임시 서버 설정 필요
+
+        return chargeMoney
+    }
+
 }
