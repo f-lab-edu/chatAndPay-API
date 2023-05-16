@@ -13,7 +13,7 @@ data class Wallet(
     @Column(nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null,
-    val money: Int,
+    var money: Int,
     @OneToOne
     @JoinColumn(name = "pay_user_id")
     val payUser: PayUser
