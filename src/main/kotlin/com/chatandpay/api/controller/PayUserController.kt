@@ -1,6 +1,6 @@
 package com.chatandpay.api.controller
 
-import com.chatandpay.api.controller.dto.SignUpPayUserDTO
+import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.service.PayUserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

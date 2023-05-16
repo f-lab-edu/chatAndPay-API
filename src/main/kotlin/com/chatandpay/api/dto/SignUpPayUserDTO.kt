@@ -1,4 +1,4 @@
-package com.chatandpay.api.controller.dto
+package com.chatandpay.api.dto
 
 data class SignUpPayUserDTO(
     val ci: String,

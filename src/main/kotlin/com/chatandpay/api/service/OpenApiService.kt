@@ -1,11 +1,11 @@
 package com.chatandpay.api.service
 
-import com.chatandpay.api.controller.dto.InquiryRealNameDTO
+import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.domain.AccessToken
 import com.chatandpay.api.repository.AccessTokenRepository
 import com.chatandpay.api.repository.PayUserRepository
-import com.chatandpay.api.service.dto.RealNameInquiryResponseDTO
-import com.chatandpay.api.service.dto.OpenApiAccessTokenDTO
+import com.chatandpay.api.dto.RealNameInquiryResponseDTO
+import com.chatandpay.api.dto.OpenApiAccessTokenDTO
 import com.chatandpay.api.utils.RandomUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy

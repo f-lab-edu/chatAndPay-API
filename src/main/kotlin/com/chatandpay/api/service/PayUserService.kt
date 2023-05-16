@@ -1,12 +1,12 @@
 package com.chatandpay.api.service
 
-import com.chatandpay.api.controller.dto.SignUpPayUserDTO
+import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.repository.WalletRepository
-import com.chatandpay.api.service.dto.DepositWalletDTO
+import com.chatandpay.api.dto.DepositWalletDTO
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional

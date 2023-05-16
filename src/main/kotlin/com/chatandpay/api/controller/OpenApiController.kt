@@ -1,6 +1,6 @@
 package com.chatandpay.api.controller
 
-import com.chatandpay.api.controller.dto.InquiryRealNameDTO
+import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.service.OpenApiService
 import lombok.RequiredArgsConstructor
 import org.springframework.http.HttpStatus

@@ -1,4 +1,4 @@
-package com.chatandpay.api.service.dto
+package com.chatandpay.api.dto
 
 data class DepositWalletDTO (
     val depositMoney: Int,
