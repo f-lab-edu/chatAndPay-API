@@ -1,12 +1,12 @@
 package com.chatandpay.api.service
 
-import com.chatandpay.api.controller.dto.InquiryRealNameDTO
-import com.chatandpay.api.controller.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.domain.BANK_CODE
+import com.chatandpay.api.dto.InquiryRealNameDTO
+import com.chatandpay.api.dto.OtherBankAccountRequestDTO
+import com.chatandpay.api.code.BANK_CODE
 import com.chatandpay.api.domain.OtherBankAccount
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
-import com.chatandpay.api.service.dto.DepositWalletDTO
+import com.chatandpay.api.dto.DepositWalletDTO
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional

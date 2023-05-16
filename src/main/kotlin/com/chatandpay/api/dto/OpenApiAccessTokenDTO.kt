@@ -1,4 +1,4 @@
-package com.chatandpay.api.service.dto
+package com.chatandpay.api.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 

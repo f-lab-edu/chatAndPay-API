@@ -1,8 +1,8 @@
 package com.chatandpay.api.controller
 
-import com.chatandpay.api.controller.dto.OtherBankAccountRequestDTO
+import com.chatandpay.api.dto.OtherBankAccountRequestDTO
 import com.chatandpay.api.service.AccountService
-import com.chatandpay.api.service.dto.DepositWalletDTO
+import com.chatandpay.api.dto.DepositWalletDTO
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping

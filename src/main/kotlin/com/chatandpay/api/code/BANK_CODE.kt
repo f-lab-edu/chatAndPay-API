@@ -1,4 +1,4 @@
-package com.chatandpay.api.domain
+package com.chatandpay.api.code
 
 import lombok.Getter
 import lombok.RequiredArgsConstructor
