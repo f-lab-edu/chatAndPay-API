@@ -8,3 +8,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: Asia/Seoul
+
+sens:
+  serviceId: ncp:sms:kr:287007728949:talkandpay
+  accessKey: 4XzkbTEaNVJimv14c5s7
+  secretKey: 1agKYK3j8CoFbCL4mmyOZekkHkObtL6NMM8l2QFs
+  senderPhone: 01072808790
+openapi:
+  clientId: 2232c401-f197-4dd0-ac98-cf4a4ff1792d
+  clientSecret: a45ef5fd-f59f-4e49-8dc9-8e1cd4ff5f66
+  url: https://testapi.openbanking.or.kr
+  institutionCode: M202300836
