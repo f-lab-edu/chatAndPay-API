@@ -8,7 +8,7 @@ import javax.persistence.*
 @Table(name = "member")
 @AllArgsConstructor
 @NoArgsConstructor
-data class User (
+data class User  (
 
     @Id
     @Column(nullable = false)
@@ -25,5 +25,5 @@ data class User (
     @Column(nullable = false)
     var verificationId: Long,
 
-)
+): BaseEntity()
 
