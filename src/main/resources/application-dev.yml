@@ -1,0 +1,9 @@
+spring:
+  profiles: dev
+  jpa:
+    database: mysql
+    generate-ddl: true
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+  hibernate:
+    ddl-auto: create
