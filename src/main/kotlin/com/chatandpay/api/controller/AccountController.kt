@@ -29,16 +29,10 @@ class AccountController(val accountService : AccountService) {
 
 
     @PostMapping("/deposit")
-    fun chargeWalletformAccount(@RequestBody tempMap: Map<String, String>): ResponseEntity<Any> {
-
-        val accountId = (tempMap["accountId"])?.toLong()!!
-        val withdrawalAmount = (tempMap["withdrawalAmount"])?.toInt()!!
-
-        val tempDepositWallet = DepositWalletDTO(withdrawalAmount, accountId)
-        // TODO DTO 위치 확정 필요
+    fun chargeWalletformAccount(@RequestBody depositMoney: DepositWalletDTO): ResponseEntity<Any> {
 
         try {
-            accountService.chargeWallet(tempDepositWallet)
+            accountService.chargeWallet(depositMoney)
         } catch(e: Exception) {
             return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
         }
