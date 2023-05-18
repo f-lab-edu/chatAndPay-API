@@ -92,7 +92,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
     }
 
     @Transactional
-    fun updateUser(id: Long, userRequest: User) {
+    fun updateUser(id: Long, userRequest: User) : User? {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
@@ -124,20 +124,19 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
         findUser.cellphone = userRequest.cellphone
 
-        userRepository.save(findUser)
+        return userRepository.save(findUser)
     }
 
     @Transactional
-    fun deleteUser(id: Long) {
+    fun deleteUser(id: Long) : Boolean {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
         try {
-            userRepository.delete(findUser)
+            return userRepository.delete(findUser)
         }catch (e : Exception) {
             throw Exception(e.message)
         }
-
 
     }
 
