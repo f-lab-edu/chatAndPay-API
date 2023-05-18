@@ -4,7 +4,6 @@ import com.chatandpay.api.domain.User
 import com.chatandpay.api.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -16,11 +15,7 @@ class UserController(val userService: UserService) {
     @PostMapping("/login")
     fun loginUser(@RequestBody user: User): ResponseEntity<Any> {
 
-        try {
-            userService.login(user)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.login(user)
 
         return ResponseEntity.ok("ok")
     }
@@ -28,11 +23,7 @@ class UserController(val userService: UserService) {
     @PostMapping("/auth")
     fun authLoginUser(@RequestBody user: User): ResponseEntity<Any> {
 
-        try {
-            userService.authLogin(user)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.authLogin(user)
 
         return ResponseEntity.ok("ok")
     }
@@ -40,11 +31,7 @@ class UserController(val userService: UserService) {
     @PostMapping("/authJoin")
     fun authJoinUser(@RequestBody user: User): ResponseEntity<Any> {
 
-        try {
-            userService.authJoin(user)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.authJoin(user)
 
         return ResponseEntity.ok("ok")
     }
@@ -56,11 +43,7 @@ class UserController(val userService: UserService) {
         val authNumber = mapper.treeToValue(saveObj["authNumber"], String::class.java)
         val user = mapper.treeToValue(saveObj["user"], User::class.java)
 
-        try {
-            userService.authLoginConfirm(user, authNumber)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.authLoginConfirm(user, authNumber)
 
         return ResponseEntity.ok("ok")
     }
@@ -68,11 +51,7 @@ class UserController(val userService: UserService) {
     @PostMapping("/signup")
     fun createUser(@RequestBody user: User): ResponseEntity<Any> {
 
-        try {
-            userService.register(user)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.register(user)
 
         return ResponseEntity.ok("ok")
     }
@@ -80,11 +59,7 @@ class UserController(val userService: UserService) {
     @PatchMapping("/{id}")
     fun updateUser(@PathVariable("id") id: Long, @RequestBody userRequest: User): ResponseEntity<Any> {
 
-        try {
-            userService.updateUser(id, userRequest)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.updateUser(id, userRequest)
 
         return ResponseEntity.ok("ok")
     }
@@ -93,11 +68,7 @@ class UserController(val userService: UserService) {
     @DeleteMapping("/{id}")
     fun updateUser(@PathVariable("id") id: Long): ResponseEntity<Any> {
 
-        try {
-            userService.deleteUser(id)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        userService.deleteUser(id)
 
         return ResponseEntity.ok("ok")
     }
