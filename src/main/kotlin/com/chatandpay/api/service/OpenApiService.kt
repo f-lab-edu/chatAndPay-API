@@ -93,6 +93,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         headers.contentType = MediaType.APPLICATION_JSON
         headers.acceptCharset = listOf(Charset.forName("UTF-8"))
 
+        // 은행거래고유번호(bankTranId): 이용기관코드 + 생성주체구분코드(U) + 이용기관 부여번호(9자리, 1일 내 중복 없이 랜덤 부여 필요)
         inquiryDto.bankTranId =  institutionCode + "U" + RandomUtil.generateRandomNineDigits()
         inquiryDto.accountHolderInfo = payUserRepository.findById(inquiryDto.payUserId)?.birthDate?.substring(2,8) ?: throw IllegalAccessException("회원 조회 실패")
         inquiryDto.tranDtime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")).toString()
