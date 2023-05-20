@@ -25,16 +25,16 @@ import javax.transaction.Transactional
 @Service
 class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUserRepository: PayUserRepository) {
 
-    @Value("\${openapi.clientId}")
+    @Value("\${openapi.client-id}")
     val clientId: String? = null
 
-    @Value("\${openapi.clientSecret}")
+    @Value("\${openapi.client-secret}")
     val clientSecret: String? = null
 
     @Value("\${openapi.url}")
     val url: String? = null
 
-    @Value("\${openapi.institutionCode}")
+    @Value("\${openapi.institution-code}")
     val institutionCode: String? = null
 
 

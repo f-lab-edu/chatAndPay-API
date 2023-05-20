@@ -33,16 +33,16 @@ import javax.transaction.Transactional
 @Service
 class SmsService(private val authRepository: AuthRepository) {
 
-    @Value("\${sens.accessKey}")
+    @Value("\${sens.access-key}")
     private val accessKey: String? = null
 
-    @Value("\${sens.secretKey}")
+    @Value("\${sens.secret-key}")
     private val secretKey: String? = null
 
-    @Value("\${sens.serviceId}")
+    @Value("\${sens.service-id}")
     private val serviceId: String? = null
 
-    @Value("\${sens.senderPhone}")
+    @Value("\${sens.sender-phone}")
     private val senderPhone: String? = null
 
 

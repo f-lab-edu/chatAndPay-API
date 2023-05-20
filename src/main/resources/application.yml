@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: classpath:api-keys.yml
   profiles:
     default: dev
   datasource:
@@ -12,3 +14,13 @@ spring:
       hibernate:
         jdbc:
           time_zone: Asia/Seoul
+sens:
+  service-id: ${api-keys.sens.service-id}
+  access-key: ${api-keys.sens.access-key}
+  secret-key: ${api-keys.sens.secret-key}
+  sender-phone: ${api-keys.sens.sender-phone}
+openapi:
+  client-id: ${api-keys.openapi.client-id}
+  client-secret: ${api-keys.openapi.client-secret}
+  url: https://testapi.openbanking.or.kr
+  institution-code: ${api-keys.openapi.institution-code}
