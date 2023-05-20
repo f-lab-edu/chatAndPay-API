@@ -2,7 +2,7 @@ package com.chatandpay.api.service
 
 import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.code.BANK_CODE
+import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.domain.OtherBankAccount
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
@@ -23,9 +23,11 @@ class AccountService (
     fun saveAccount(dto: OtherBankAccountRequestDTO) {
 
         val selectedUser = payUserRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
-        BANK_CODE.values().find { it.bankCode == dto.bankCode} ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
+        BankCode.values().find { it.bankCode == dto.bankCode } ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
 
         val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedUser)
+
+        println("account$account")
 
         val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
