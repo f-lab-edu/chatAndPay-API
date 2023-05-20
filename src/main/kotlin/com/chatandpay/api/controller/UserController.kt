@@ -1,5 +1,6 @@
 package com.chatandpay.api.controller
 
+import com.chatandpay.api.code.ErrorCode
 import com.chatandpay.api.common.ApiResponse
 import com.chatandpay.api.common.ErrorResponse
 import com.chatandpay.api.common.SuccessResponse
@@ -8,7 +9,6 @@ import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -88,10 +88,11 @@ class UserController(val userService: UserService) {
         val deletedYn = userService.deleteUser(id)
 
         return if (deletedYn) {
-            val successResponse = SuccessResponse(HttpStatus.OK, "탈퇴 완료")
+            val successResponse = SuccessResponse("탈퇴 완료")
             ResponseEntity.ok(successResponse)
         } else {
-            val errorResponse = ErrorResponse(HttpStatus.BAD_REQUEST, "탈퇴 실패")
+            val errorCode = ErrorCode.BAD_REQUEST
+            val errorResponse = ErrorResponse(errorCode.value, "탈퇴 실패")
             ResponseEntity.badRequest().body(errorResponse)
         }
 
