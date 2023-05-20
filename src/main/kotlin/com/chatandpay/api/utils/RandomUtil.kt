@@ -8,5 +8,10 @@ class RandomUtil {
             val randomInt = Random.nextInt(1000000)
             return String.format("%06d", randomInt)
         }
+
+        fun generateRandomNineDigits(): String {
+            val randomInt = Random.nextInt(1000000000)
+            return String.format("%09d", randomInt)
+        }
     }
 }

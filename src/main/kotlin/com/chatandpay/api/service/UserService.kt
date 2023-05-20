@@ -10,7 +10,7 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-class UserService(private val userRepository: UserRepository, private val authRepository: AuthRepository) {
+class UserService(private val userRepository: UserRepository, private val authRepository: AuthRepository, private val payUserService: PayUserService) {
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
@@ -132,7 +132,9 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
-        try {
+        try {if(payUserService.isPayUser(id)) {
+                payUserService.withdrawPayService(id)
+            }
             return userRepository.delete(findUser)
         }catch (e : Exception) {
             throw Exception(e.message)
