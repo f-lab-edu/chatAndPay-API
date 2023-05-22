@@ -55,6 +55,10 @@ class TransferService (
         val payUser = findTransferObj.receiver
         val payUserId = payUser.id ?: throw EntityNotFoundException("송신 요청을 찾을 수 없습니다.")
 
+        if (findTransferObj.transferred) {
+            throw IllegalArgumentException("이미 수신 완료된 송신 요청입니다.")
+        }
+
         val inputDTO = DepositWalletDTO(findTransferObj.amount, payUserId)
 
         val calculatedMoney = (payUser.wallet?.money ?: 0) + findTransferObj.amount
