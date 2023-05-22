@@ -29,10 +29,10 @@ class TransferService (
 
         if (findSenderWalletAmount < dto.amount) {
             throw IllegalArgumentException("출금 잔액이 부족합니다.")
-        } else {
-            findSenderWallet.money = findSenderWallet.money - dto.amount
-            walletRepository.save(findSenderWallet)
         }
+
+        findSenderWallet.money = findSenderWallet.money - dto.amount
+        walletRepository.save(findSenderWallet)
 
         val transferDto = Transfer(UUID.randomUUID(), findSendUser, findReceiveUser, dto.amount, false)
         val savedTransfer = transferRepository.save(transferDto)
