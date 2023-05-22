@@ -47,9 +47,9 @@ class AccountService (
     fun chargeWallet(depositWallet : DepositWalletDTO) : Int? {
 
         val user = accountRepository.findById(depositWallet.accountId)?.payUser ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
-
+        val updatesMoney = depositWallet.depositMoney
         // DB에 선저장 처리 - DB 에러 선 방지, 이후 API 오류가 나더라도 Transactional로 처리
-        val outputMoney = payUserService.depositintoWallet(depositWallet, user)?.wallet?.money
+        val outputMoney = payUserService.depositintoWallet(updatesMoney, user)?.wallet?.money
         val depositedMoney = outputMoney?.let { openApiService.withdrawMoney(it) }
 
         // DB에 저장된 output 값 == API 호출 후 전달 값 비교
