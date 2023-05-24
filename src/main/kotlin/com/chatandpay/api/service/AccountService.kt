@@ -27,8 +27,6 @@ class AccountService (
 
         val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedUser)
 
-        println("account$account")
-
         val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
 
@@ -38,9 +36,9 @@ class AccountService (
 
         if ( accountRepository.findDuplicatedAccount(account) ) {
             throw IllegalArgumentException("기 등록 계좌입니다.")
-        } else {
-            accountRepository.save(account)
         }
+
+        accountRepository.save(account)
 
     }
 
@@ -55,12 +53,11 @@ class AccountService (
         val depositedMoney = outputMoney?.let { openApiService.withdrawMoney(it) }
 
         // DB에 저장된 output 값 == API 호출 후 전달 값 비교
-        if (depositedMoney == outputMoney) {
-            return depositedMoney
-        } else {
+        if (depositedMoney != outputMoney) {
             throw RuntimeException("충전 실패")
         }
 
+        return depositedMoney
     }
 
 

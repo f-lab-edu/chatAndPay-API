@@ -68,16 +68,15 @@ class SmsService(private val authRepository: AuthRepository) {
         val now = LocalDateTime.now()
         val duration = Duration.between(smsAuth.requestTime, now)
 
-        if(duration.toMinutes() <= 3) {
-
-            smsAuth.isVerified = true
-            smsAuth.confirmTime = now
-
-            authRepository.save(smsAuth)
-
-        } else {
+        if(duration.toMinutes() > 3) {
             throw TimeoutException("요청 시간이 3분을 초과했습니다.")
         }
+
+        smsAuth.isVerified = true
+        smsAuth.confirmTime = now
+
+        authRepository.save(smsAuth)
+
 
     }
 

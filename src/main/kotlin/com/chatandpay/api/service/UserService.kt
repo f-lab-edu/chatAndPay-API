@@ -50,11 +50,11 @@ class UserService(private val userRepository: UserRepository, private val authRe
         val findUser = user.userId?.let { userRepository.findByUserId(it) }
                         ?: throw EntityNotFoundException("해당 아이디로 가입된 사용자가 없습니다.")
 
-        if(passwordEncoder.matches(user.password, findUser.password)) {
-            return findUser
-        } else {
+        if(!passwordEncoder.matches(user.password, findUser.password)) {
             throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
         }
+
+        return findUser
 
     }
 
@@ -82,13 +82,13 @@ class UserService(private val userRepository: UserRepository, private val authRe
         val findAuth = user.cellphone.let { authRepository.findByCellphone(it) }
             ?: throw EntityNotFoundException("해당 휴대전화번호로 요청된 인증이 없습니다.")
 
-        if(authNumber == findAuth.authNumber) {
-            smsService.authSendSmsConfirm(findAuth)
-            return user
-        } else {
+        if(authNumber != findAuth.authNumber) {
             throw IllegalArgumentException("입력한 인증 문자가 일치하지 않습니다.")
         }
 
+        smsService.authSendSmsConfirm(findAuth)
+
+        return user
     }
 
     @Transactional
@@ -109,15 +109,15 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
         val encodedPassword = passwordEncoder.encode(userRequest.password)
 
-        if(!isIdRegistered){
-            if(!canRegIdAndPw) {
-                throw IllegalArgumentException("ID / 패스워드는 동시에 등록되어야 합니다.")
-            } else {
+        when {
+            !isIdRegistered -> {
+                if (!canRegIdAndPw) {
+                    throw IllegalArgumentException("ID / 패스워드는 동시에 등록되어야 합니다.")
+                }
                 findUser.userId = userRequest.userId
                 findUser.password = encodedPassword
             }
-        } else {
-            if(userRequest.password.isNullOrEmpty()) {
+            userRequest.password.isNullOrEmpty() -> {
                 findUser.password = encodedPassword
             }
         }
