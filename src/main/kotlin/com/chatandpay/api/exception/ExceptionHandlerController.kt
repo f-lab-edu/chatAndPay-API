@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import java.util.concurrent.TimeoutException
 import javax.persistence.EntityNotFoundException
 
 
@@ -32,6 +33,14 @@ internal class ExceptionHandlerController {
     protected fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse>? {
         val errorEnum = ErrorCode.BAD_REQUEST
         val errorMsg = ex.message ?: "Invalid request."
+        val errorCode = ErrorResponse(errorEnum.value, errorMsg)
+        return handleExceptionInternal(errorCode)
+    }
+
+    @ExceptionHandler(TimeoutException::class)
+    protected fun handleTimeoutException(ex: TimeoutException): ResponseEntity<ErrorResponse>? {
+        val errorEnum = ErrorCode.REQUEST_TIMEOUT
+        val errorMsg = ex.message ?: "Request Timeout."
         val errorCode = ErrorResponse(errorEnum.value, errorMsg)
         return handleExceptionInternal(errorCode)
     }
