@@ -5,5 +5,6 @@ import com.chatandpay.api.common.ApiResponse
 class UserDTO (
     var name: String,
     var cellphone: String,
-    var userId: String?
+    var userId: String?,
+    var password: String?
 ) : ApiResponse()

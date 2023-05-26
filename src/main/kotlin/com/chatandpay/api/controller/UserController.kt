@@ -6,9 +6,10 @@ import com.chatandpay.api.common.ErrorResponse
 import com.chatandpay.api.common.SuccessResponse
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.dto.UserDTO
+import com.chatandpay.api.dto.AuthConfirmResponseDTO
+import com.chatandpay.api.dto.AuthConfirmRequestDTO
 import com.chatandpay.api.service.UserService
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -21,41 +22,55 @@ class UserController(val userService: UserService) {
     fun loginUser(@RequestBody user: User) : ResponseEntity<UserDTO>{
 
         val loginUser = userService.login(user)
-        val responseBody = loginUser?.let { UserDTO(it.name, loginUser.cellphone, loginUser.userId) }
+        val responseBody = loginUser?.let { UserDTO(it.name, loginUser.cellphone, loginUser.userId, null) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
     @PostMapping("/auth")
-    fun authLoginUser(@RequestBody user: User) : ResponseEntity<UserDTO>{
+    fun authLoginUser(@RequestBody requestBody: String) : ResponseEntity<UserDTO>{
 
-        val authLoginUser = userService.authLogin(user)
-        val responseBody = authLoginUser?.let { UserDTO(it.name, it.cellphone, it.userId) }
+        val objectMapper = ObjectMapper()
+        val jsonObject = objectMapper.readValue(requestBody, Map::class.java)
+        val cellphone = jsonObject["cellphone"].toString()
 
-        return ResponseEntity.ok(responseBody)
-
-    }
-
-    @PostMapping("/authJoin")
-    fun authJoinUser(@RequestBody user: User) : ResponseEntity<UserDTO>{
-
-        val authJoinUser = userService.authLogin(user)
-        val responseBody = authJoinUser?.let { UserDTO(it.name, it.cellphone, it.userId) }
+        val authLoginUser = userService.authLogin(cellphone)
+        val responseBody = authLoginUser?.let { UserDTO(it.name, it.cellphone, it.userId,null) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
-    @PostMapping("/authConfirm")
-    fun confirmAuthLoginUser(@RequestBody saveObj : ObjectNode) : ResponseEntity<UserDTO>{
+    @PostMapping("/auth/signup")
+    fun authJoinUser(@RequestBody user: User) : ResponseEntity<SuccessResponse>{
 
-        val mapper = ObjectMapper()
-        val authNumber = mapper.treeToValue(saveObj["authNumber"], String::class.java)
-        val user = mapper.treeToValue(saveObj["user"], User::class.java)
+        userService.authJoin(user) ?: throw RuntimeException("인증 요청 중 오류가 발생하였습니다.")
 
-        val confirmedUser = userService.authLoginConfirm(user, authNumber)
-        val responseBody = confirmedUser?.let { UserDTO(it.name, it.cellphone, it.userId) }
+        val responseBody = SuccessResponse("메시지 발송 성공")
+
+        return ResponseEntity.ok(responseBody)
+
+    }
+
+    @PostMapping("/auth/confirm")
+    fun confirmAuthLoginUser(@RequestBody saveObj : AuthConfirmRequestDTO) : ResponseEntity<UserDTO>{
+
+        val confirmedUser = userService.authLoginConfirm(saveObj)
+
+        val responseBody = confirmedUser?.let { UserDTO(it.name, it.cellphone, it.userId, null) }
+
+        return ResponseEntity.ok(responseBody)
+
+    }
+
+
+    @PostMapping("/auth/signup/confirm")
+    fun confirmAuthJoinUser(@RequestBody saveObj : AuthConfirmRequestDTO) : ResponseEntity<AuthConfirmResponseDTO>{
+
+        val smsAuthentication = userService.authConfirm(saveObj)
+
+        val responseBody = smsAuthentication.id?.let { AuthConfirmResponseDTO(it) }
 
         return ResponseEntity.ok(responseBody)
 
@@ -65,7 +80,7 @@ class UserController(val userService: UserService) {
     fun createUser(@RequestBody user: User) : ResponseEntity<UserDTO>{
 
         val signupUser = userService.register(user)
-        val responseBody = signupUser?.let { UserDTO(it.name, it.cellphone, it.userId) }
+        val responseBody = signupUser?.let { UserDTO(it.name, it.cellphone, it.userId, null) }
 
         return ResponseEntity.ok(responseBody)
 
@@ -75,7 +90,7 @@ class UserController(val userService: UserService) {
     fun updateUser(@PathVariable("id") id: Long, @RequestBody userRequest: User) : ResponseEntity<UserDTO>{
 
         val updatedUser = userService.updateUser(id, userRequest)
-        val responseBody = updatedUser?.let { UserDTO(it.name, it.cellphone, it.userId) }
+        val responseBody = updatedUser?.let { UserDTO(it.name, it.cellphone, it.userId, null) }
 
         return ResponseEntity.ok(responseBody)
 

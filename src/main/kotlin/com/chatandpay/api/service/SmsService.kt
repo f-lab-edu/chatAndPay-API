@@ -63,7 +63,7 @@ class SmsService(private val authRepository: AuthRepository) {
     }
 
     @Transactional
-    fun authSendSmsConfirm(smsAuth : SmsAuthentication) {
+    fun authSendSmsConfirm(smsAuth : SmsAuthentication): SmsAuthentication? {
 
         val now = LocalDateTime.now()
         val duration = Duration.between(smsAuth.requestTime, now)
@@ -75,8 +75,7 @@ class SmsService(private val authRepository: AuthRepository) {
         smsAuth.isVerified = true
         smsAuth.confirmTime = now
 
-        authRepository.save(smsAuth)
-
+       return authRepository.save(smsAuth)
 
     }
 

@@ -3,11 +3,14 @@ package com.chatandpay.api.domain
 import lombok.AllArgsConstructor
 import lombok.NoArgsConstructor
 import javax.persistence.*
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 @Entity
 @Table(name = "member")
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class User  (
 
     @Id
