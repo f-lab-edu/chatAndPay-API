@@ -1,11 +1,13 @@
 package com.chatandpay.api.service
 
+import com.chatandpay.api.code.BankRspCode
 import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.domain.AccessToken
 import com.chatandpay.api.repository.AccessTokenRepository
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.dto.RealNameInquiryResponseDTO
 import com.chatandpay.api.dto.OpenApiAccessTokenDTO
+import com.chatandpay.api.dto.WithdrawMoneyResponseDTO
 import com.chatandpay.api.utils.RandomUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
@@ -105,12 +107,17 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         }
         val jsonBody = objectMapper.writeValueAsString(inquiryDto)
 
-        return rest.postForObject(
+        val returnRestTemplate = rest.postForObject(
             uri,
             HttpEntity(jsonBody, headers),
             RealNameInquiryResponseDTO::class.java
             // TODO - 타 응답 반환 시 ResponceDTO 처리
         ) ?: throw RuntimeException("조회 실패")
+
+        returnRestTemplate.bankRspCode?.let { checkBankRspCode(it) }
+
+        return returnRestTemplate
+
     }
 
     fun withdrawMoney(chargeMoney: Int) : Int {
@@ -118,9 +125,49 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
 
+        val testDTO = WithdrawMoneyResponseDTO(
+            apiTranId = "2ffd133a-d17a-431d-a6a5",
+            apiTranDtm = "20230910101921567",
+            rspCode = "A0000",
+            rspMessage = "",
+            dpsBankCodeStd = "097",
+            dpsBankCodeSub = "1230001",
+            dpsBankName = "오픈은행",
+            dpsAccountNumMasked = "000-1230000-***",
+            dpsPrintContent = "입금계좌인자내역",
+            dpsAccountHolderName = "허균",
+            bankTranId = "F123456789U4BC34239Z",
+            bankTranDate = "20190910",
+            bankCodeTran = "097",
+            bankRspCode = "453",
+            bankRspMessage = "",
+            fintechUseNum = "123456789012345678901234",
+            accountAlias = "급여계좌",
+            bankCodeStd = "097",
+            bankCodeSub = "1230001",
+            bankName = "오픈은행",
+            savingsBankName = "",
+            accountNumMasked = "000-1230000-***",
+            printContent = "출금계좌인자내역",
+            accountHolderName = "홍길동",
+            tranAmt = "10000",
+            wdLimitRemainAmt = "9990000"
+        )
+
         // TODO token 종류 상이함으로 인한 임시 서버 설정 필요
 
+        checkBankRspCode(testDTO.bankRspCode)
+
         return chargeMoney
+    }
+
+    fun checkBankRspCode(bankRspCode: String) {
+        if (bankRspCode != "000") {
+            // bankRspCode, 응답코드(참가기관)이 정상(000)이 아닌 경우에는 ‘이체 불능’으로 간주
+            val rspCodeCtnt = BankRspCode.values().find { it.bankRspCode == bankRspCode}
+                ?: throw IllegalArgumentException("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.")
+            throw RuntimeException(rspCodeCtnt.msg)
+        }
     }
 
 }
