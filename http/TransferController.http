@@ -1,0 +1,12 @@
+### 1. 송금하기 (송신)
+POST http://localhost:8080/transfers HTTP/1.1
+Content-Type: application/json
+
+{
+  "sender_id"   : 5,
+  "receiver_id" : 7,
+  "amount"      : 100
+}
+
+### 2. 송금하기 (수신)
+POST http://localhost:8080/transfers/38e128ae-7589-4033-bddd-0e15527f4be3 HTTP/1.1
