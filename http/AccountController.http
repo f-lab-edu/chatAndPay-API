@@ -1,0 +1,20 @@
+### 1. 타행 계좌 등록
+POST http://localhost:8080/accounts HTTP/1.1
+Content-Type: application/json
+
+{
+  "bank_code": "092",
+  "account_number": "1234567890123451",
+  "account_name": "토스토스",
+  "auto_debit_agree": "Y",
+  "user_id": "5"
+}
+
+### 2. 타행 계좌에서 지갑 충전
+POST http://localhost:8080/accounts/deposit HTTP/1.1
+Content-Type: application/json
+
+{
+  "account_id" : 9,
+  "deposit_money": 100
+}
