@@ -1,7 +1,7 @@
 package com.chatandpay.api.controller
 
+import com.chatandpay.api.component.AccountCheck
 import com.chatandpay.api.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.service.AccountService
 import com.chatandpay.api.dto.DepositWalletDTO
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -13,13 +13,15 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/accounts")
-class AccountController(val accountService : AccountService) {
+class AccountController(
+    val accountCheck : AccountCheck,
+) {
 
     @PostMapping("")
     fun addExternalAccount(@RequestBody account: OtherBankAccountRequestDTO): ResponseEntity<Any> {
 
         try {
-            accountService.saveAccount(account)
+            accountCheck.saveAccount(account)
         } catch(e: Exception) {
             return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
         }
@@ -29,10 +31,10 @@ class AccountController(val accountService : AccountService) {
 
 
     @PostMapping("/deposit")
-    fun chargeWalletformAccount(@RequestBody depositMoney: DepositWalletDTO): ResponseEntity<Any> {
+    fun chargeWalletfromAccount(@RequestBody depositMoney: DepositWalletDTO): ResponseEntity<Any> {
 
         try {
-            accountService.chargeWallet(depositMoney)
+            accountCheck.chargeWallet(depositMoney)
         } catch(e: Exception) {
             return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
         }
