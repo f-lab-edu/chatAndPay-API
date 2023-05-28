@@ -12,5 +12,4 @@ data class ReceiveTransferResponseDTO(
     val sendingAmount: Int,
     val walletAmount: Int
 
-
 ) : ApiResponse()

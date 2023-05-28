@@ -13,5 +13,3 @@ data class ReceiveTransferRequestDTO(
     val amount: Int
 
 ): ApiResponse()
-
-
