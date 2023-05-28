@@ -7,7 +7,9 @@ import java.util.*
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class SendTransferResponseDTO (
+  
     val transferUuid: UUID,
     val receivedAmount: Int,
     val walletAmount: Int,
+
 ) : ApiResponse()
