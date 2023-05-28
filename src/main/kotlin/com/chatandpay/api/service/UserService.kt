@@ -1,6 +1,8 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.User
+import com.chatandpay.api.domain.sms.SmsAuthentication
+import com.chatandpay.api.dto.AuthConfirmRequestDTO
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -50,11 +52,11 @@ class UserService(private val userRepository: UserRepository, private val authRe
         val findUser = user.userId?.let { userRepository.findByUserId(it) }
                         ?: throw EntityNotFoundException("해당 아이디로 가입된 사용자가 없습니다.")
 
-        if(passwordEncoder.matches(user.password, findUser.password)) {
-            return findUser
-        } else {
+        if(!passwordEncoder.matches(user.password, findUser.password)) {
             throw IllegalArgumentException("비밀번호가 일치하지 않습니다.")
         }
+
+        return findUser
 
     }
 
@@ -67,36 +69,51 @@ class UserService(private val userRepository: UserRepository, private val authRe
         return smsService.authSendSms(user.cellphone)
     }
 
-    fun authLogin(user : User): User? {
+    fun authLogin(cellphone : String): User? {
 
-        val findUser = userRepository.findByCellphone(user.cellphone)
+        val findUser = userRepository.findByCellphone(cellphone)
             ?: throw EntityNotFoundException("해당 휴대전화번호로 가입된 사용자가 없습니다.")
 
-        smsService.authSendSms(user.cellphone)
+        smsService.authSendSms(cellphone)
 
         return findUser
     }
 
-    fun authLoginConfirm(user : User, authNumber : String) : User? {
+    fun authLoginConfirm(saveObj : AuthConfirmRequestDTO): User? {
 
-        val findAuth = user.cellphone.let { authRepository.findByCellphone(it) }
+        val authConfirm: SmsAuthentication = authConfirm(saveObj)
+
+        return userRepository.findByCellphone(authConfirm.phoneNumber)
+            ?: throw EntityNotFoundException("해당 휴대전화번호로 가입된 사용자가 없습니다.")
+    }
+
+
+    fun authConfirm(saveObj : AuthConfirmRequestDTO): SmsAuthentication {
+
+        val findAuth = authRepository.findByCellphone(saveObj.cellphone)
             ?: throw EntityNotFoundException("해당 휴대전화번호로 요청된 인증이 없습니다.")
 
-        if(authNumber == findAuth.authNumber) {
-            smsService.authSendSmsConfirm(findAuth)
-            return user
-        } else {
+        if (saveObj.authNumber != findAuth.authNumber) {
             throw IllegalArgumentException("입력한 인증 문자가 일치하지 않습니다.")
         }
 
+        if (findAuth.isVerified) {
+            throw IllegalArgumentException("이미 처리된 인증입니다.")
+        }
+
+        return smsService.authSendSmsConfirm(findAuth)
+            ?: throw RuntimeException("인증 중 오류가 발생하였습니다.")
     }
+
+
 
     @Transactional
     fun updateUser(id: Long, userRequest: User) : User? {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
-        if (userRequest.userId?.let { userRepository.existsByUserIdAndIdNot(it, id) } == true){
+        if (!userRequest.userId.isNullOrEmpty()
+            && userRequest.userId?.let { userRepository.existsByUserIdAndIdNot(it, id) } == true){
             throw IllegalArgumentException("이미 존재하는 아이디입니다.")
         }
 
@@ -105,19 +122,20 @@ class UserService(private val userRepository: UserRepository, private val authRe
         }
 
         val isIdRegistered = !findUser.userId.isNullOrEmpty() && !findUser.password.isNullOrEmpty()
+        val doRegIdAndPw = !userRequest.userId.isNullOrEmpty() || !userRequest.password.isNullOrEmpty()
         val canRegIdAndPw = !userRequest.userId.isNullOrEmpty() && !userRequest.password.isNullOrEmpty()
 
-        val encodedPassword = passwordEncoder.encode(userRequest.password)
+        val encodedPassword = passwordEncoder.encode(userRequest.password ?: "")
 
-        if(!isIdRegistered){
-            if(!canRegIdAndPw) {
-                throw IllegalArgumentException("ID / 패스워드는 동시에 등록되어야 합니다.")
-            } else {
+        when {
+            !isIdRegistered && doRegIdAndPw -> {
+                if (!canRegIdAndPw) {
+                    throw IllegalArgumentException("ID / 패스워드는 동시에 등록되어야 합니다.")
+                }
                 findUser.userId = userRequest.userId
                 findUser.password = encodedPassword
             }
-        } else {
-            if(userRequest.password.isNullOrEmpty()) {
+            !userRequest.password.isNullOrEmpty() -> {
                 findUser.password = encodedPassword
             }
         }

@@ -1,0 +1,16 @@
+### 1. [for Dev] OpenAPI 통신 토큰 DB 저장
+GET http://localhost:8080/openapi/token HTTP/1.1
+
+### 2. OpenAPI 계좌 실명 조회 
+POST http://localhost:8080/openapi/real_name HTTP/1.1
+Content-Type: application/json
+
+{
+    "bank_tran_id": "", 
+    "bank_code_std": "092",
+    "account_num": "1234567890123456", 
+    "account_holder_info_type": " ", 
+    "account_holder_info": "", 
+    "tran_dtime": "",
+    "pay_user_id": 5
+}

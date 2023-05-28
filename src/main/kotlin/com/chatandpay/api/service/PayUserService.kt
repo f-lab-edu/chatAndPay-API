@@ -20,17 +20,13 @@ class PayUserService(private val payUserRepository: PayUserRepository, private v
             throw IllegalArgumentException("기 가입 유저입니다.")
         }
 
-        val user = userRepository.findById(payUser.userId)
+        val user = userRepository.findById(payUser.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
 
-        if(user != null) {
-            val regUser = PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null, birthDate = payUser.birthDate)
-            val savedUser = payUserRepository.save(regUser) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
-            val wallet = Wallet(money = 0, payUser = savedUser)
-            savedUser.wallet = walletRepository.save(wallet) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
-            return savedUser
-        } else {
-            throw IllegalArgumentException("존재하지 않는 유저입니다.")
-        }
+        val regUser = PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null, birthDate = payUser.birthDate)
+        val savedUser = payUserRepository.save(regUser) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
+        val wallet = Wallet(money = 0, payUser = savedUser)
+        savedUser.wallet = walletRepository.save(wallet) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
+        return savedUser
 
     }
 

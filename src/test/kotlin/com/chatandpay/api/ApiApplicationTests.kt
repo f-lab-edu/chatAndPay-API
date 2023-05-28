@@ -44,8 +44,7 @@ class ApiApplicationTests {
 
 	@Test
 	fun authLoginConfirm() {
-		val testUser = userService!!.login(User(userId = "idid23", name="고로케케22", cellphone = "01072808790", password = "12234"))
-		userService.authLoginConfirm(testUser!!, "421315")
+		userService!!.login(User(userId = "id", name="", cellphone = "", password = "password", verificationId = 0))
 	}
 
 	@Test

@@ -1,0 +1,94 @@
+### 1. 아이디/패스워드 로그인
+POST http://localhost:8080/users/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "name" : "",
+    "cellphone" : "",
+    "user_id": "id",
+    "password": "password"
+}
+
+### 2.1 로그인을 위한 휴대전화 인증 요청
+POST http://localhost:8080/users/auth HTTP/1.1
+Content-Type: application/json
+
+{
+    "cellphone"  : "01012341234"
+}
+
+### 2.2 로그인을 위한 휴대전화 인증 확인
+POST http://localhost:8080/users/auth/confirm HTTP/1.1
+Content-Type: application/json
+
+{
+    "cellphone"  : "01012341234",
+    "auth_number" : "256769"
+}
+
+### 3.1 회원가입을 위한 휴대전화 인증 요청
+POST http://localhost:8080/users/auth/signup HTTP/1.1
+Content-Type: application/json
+
+{
+    "name"       : "고로케케",
+    "cellphone"  : "01012341234"
+}
+
+
+### 3.2 회원 가입을 위한 휴대전화 인증 확인
+POST http://localhost:8080/users/auth/signup/confirm HTTP/1.1
+Content-Type: application/json
+
+{
+    "cellphone"  : "01012341234",
+    "auth_number" : "705851"
+}
+
+### 4. 회원가입
+POST http://localhost:8080/users/signup HTTP/1.1
+Content-Type: application/json
+
+{
+    "name"           : "고로케케",
+    "cellphone"      : "01012341234",
+    "verification_id" : "24"
+}
+
+### 5.1 회원 정보 수정 : id / password 등록하지 않음
+PATCH http://localhost:8080/users/16 HTTP/1.1
+Content-Type: application/json
+
+{
+    "name"       : "고로케케",
+    "cellphone"  : "01012341234",
+    "user_id"    : "",
+    "password"   : ""
+}
+
+### 5.2 회원 정보 수정 : id / password 등록
+PATCH http://localhost:8080/users/16 HTTP/1.1
+Content-Type: application/json
+
+{
+    "name"       : "고로케케",
+    "cellphone"  : "01012341234",
+    "user_id"    : "id",
+    "password"   : "password1"
+}
+
+
+### 5.3 회원 정보 수정 : 기 id 등록자 password 수정
+PATCH http://localhost:8080/users/16 HTTP/1.1
+Content-Type: application/json
+
+{
+    "name"       : "고로케케",
+    "cellphone"  : "01012341234",
+    "password"   : "password"
+}
+
+
+### 6. 회원 탈퇴
+DELETE http://localhost:8080/users/12 HTTP/1.1
+
