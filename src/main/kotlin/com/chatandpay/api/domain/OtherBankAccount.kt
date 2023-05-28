@@ -1,5 +1,6 @@
 package com.chatandpay.api.domain
 
+import com.fasterxml.jackson.annotation.JsonBackReference
 import javax.persistence.*
 
 @Entity
@@ -14,6 +15,7 @@ data class OtherBankAccount(
     val accountNumber: String,
     val accountName: String,
     val autoDebitAgree: String,
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "pay_member_id")
     val payUser: PayUser,
