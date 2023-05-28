@@ -8,8 +8,8 @@ import com.chatandpay.api.domain.User
 import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.dto.AuthConfirmResponseDTO
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
+import com.chatandpay.api.dto.AuthLoginUserRequestDTO
 import com.chatandpay.api.service.UserService
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -29,13 +29,9 @@ class UserController(val userService: UserService) {
     }
 
     @PostMapping("/auth")
-    fun authLoginUser(@RequestBody requestBody: String) : ResponseEntity<UserDTO>{
+    fun authLoginUser(@RequestBody requestBody: AuthLoginUserRequestDTO) : ResponseEntity<UserDTO>{
 
-        val objectMapper = ObjectMapper()
-        val jsonObject = objectMapper.readValue(requestBody, Map::class.java)
-        val cellphone = jsonObject["cellphone"].toString()
-
-        val authLoginUser = userService.authLogin(cellphone)
+        val authLoginUser = userService.authLogin(requestBody.cellphone)
         val responseBody = authLoginUser?.let { UserDTO(it.name, it.cellphone, it.userId,null) }
 
         return ResponseEntity.ok(responseBody)
