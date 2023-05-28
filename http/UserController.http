@@ -14,7 +14,6 @@ POST http://localhost:8080/users/auth HTTP/1.1
 Content-Type: application/json
 
 {
-    "name"       : "고로케케",
     "cellphone"  : "01012341234"
 }
 
