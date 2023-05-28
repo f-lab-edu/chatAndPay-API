@@ -2,10 +2,8 @@ package com.chatandpay.api.component
 
 import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.domain.OtherBankAccount
-import com.chatandpay.api.dto.DepositWalletDTO
-import com.chatandpay.api.dto.InquiryRealNameDTO
-import com.chatandpay.api.dto.OpenApiDepositWalletDTO
-import com.chatandpay.api.dto.OtherBankAccountRequestDTO
+import com.chatandpay.api.dto.*
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.service.AccountService
@@ -22,7 +20,7 @@ class AccountCheck  (
     val accountService: AccountService,
 ){
 
-    fun chargeWallet(dto : DepositWalletDTO) : Int? {
+    fun chargeWallet(dto : DepositWalletRequestDTO) : DepositWalletResponseDTO {
 
         val payUser = accountRepository.findById(dto.accountId)?.payUser
                 ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
@@ -30,11 +28,14 @@ class AccountCheck  (
         val openApiDto = OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
         val outputMoney = openApiService.withdrawMoney(openApiDto)
 
-        return accountService.chargeWallet(outputMoney)
+        val response = accountService.chargeWallet(outputMoney)
+        val userWallet = response.payUser.wallet?.money ?: throw EntityNotFoundException("지갑 조회 오류")
+
+        return DepositWalletResponseDTO(response.depositMoney, userWallet)
 
     }
 
-    fun saveAccount(dto: OtherBankAccountRequestDTO) : OtherBankAccount? {
+    fun saveAccount(dto: OtherBankAccountRequestDTO) : OtherBankAccountResponseDTO {
 
         val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
@@ -52,7 +53,9 @@ class AccountCheck  (
             throw IllegalArgumentException("기 등록 계좌입니다.")
         }
 
-        return accountService.saveAccount(account)
+        val res = accountService.saveAccount(account) ?: throw RestApiException()
+
+        return OtherBankAccountResponseDTO(res.bankCode, res.accountNumber, res.accountName, res.autoDebitAgree)
     }
 
 
