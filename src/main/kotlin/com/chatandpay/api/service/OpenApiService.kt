@@ -1,13 +1,10 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.code.BankRspCode
-import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.domain.AccessToken
+import com.chatandpay.api.dto.*
 import com.chatandpay.api.repository.AccessTokenRepository
 import com.chatandpay.api.repository.PayUserRepository
-import com.chatandpay.api.dto.RealNameInquiryResponseDTO
-import com.chatandpay.api.dto.OpenApiAccessTokenDTO
-import com.chatandpay.api.dto.WithdrawMoneyResponseDTO
 import com.chatandpay.api.utils.RandomUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
@@ -120,7 +117,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
     }
 
-    fun withdrawMoney(chargeMoney: Int) : Int {
+    fun withdrawMoney(dto: OpenApiDepositWalletDTO) : OpenApiDepositWalletDTO {
 
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
@@ -139,7 +136,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
             bankTranId = "F123456789U4BC34239Z",
             bankTranDate = "20190910",
             bankCodeTran = "097",
-            bankRspCode = "453",
+            bankRspCode = "000",
             bankRspMessage = "",
             fintechUseNum = "123456789012345678901234",
             accountAlias = "급여계좌",
@@ -158,7 +155,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
         checkBankRspCode(testDTO.bankRspCode)
 
-        return chargeMoney
+        return dto
     }
 
     fun checkBankRspCode(bankRspCode: String) {

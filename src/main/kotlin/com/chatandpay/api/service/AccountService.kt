@@ -1,7 +1,7 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.OtherBankAccount
-import com.chatandpay.api.domain.PayUser
+import com.chatandpay.api.dto.OpenApiDepositWalletDTO
 import com.chatandpay.api.repository.AccountRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -21,9 +21,9 @@ class AccountService (
 
 
     @Transactional
-    fun chargeWallet(updatesMoney : Int, user: PayUser) : Int? {
+    fun chargeWallet(dto: OpenApiDepositWalletDTO) : Int? {
 
-        return payUserService.depositintoWallet(updatesMoney, user)?.wallet?.money
+        return payUserService.depositintoWallet(dto.depositMoney, dto.payUser)?.wallet?.money
 
     }
 
