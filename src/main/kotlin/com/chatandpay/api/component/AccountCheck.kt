@@ -4,6 +4,7 @@ import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.domain.OtherBankAccount
 import com.chatandpay.api.dto.DepositWalletDTO
 import com.chatandpay.api.dto.InquiryRealNameDTO
+import com.chatandpay.api.dto.OpenApiDepositWalletDTO
 import com.chatandpay.api.dto.OtherBankAccountRequestDTO
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
@@ -23,11 +24,13 @@ class AccountCheck  (
 
     fun chargeWallet(dto : DepositWalletDTO) : Int? {
 
-        val user = accountRepository.findById(dto.accountId)?.payUser
+        val payUser = accountRepository.findById(dto.accountId)?.payUser
                 ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
-        val outputMoney = openApiService.withdrawMoney(dto.depositMoney)
 
-        return accountService.chargeWallet(outputMoney, user)
+        val openApiDto = OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
+        val outputMoney = openApiService.withdrawMoney(openApiDto)
+
+        return accountService.chargeWallet(outputMoney)
 
     }
 
