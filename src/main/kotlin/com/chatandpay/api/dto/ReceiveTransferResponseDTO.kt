@@ -1,18 +1,15 @@
 package com.chatandpay.api.dto
 
 import com.chatandpay.api.common.ApiResponse
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.util.*
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class ReceiveTransferResponseDTO(
 
-    @JsonProperty("transfer_uuid")
     val transferUuid: UUID,
-
-    @JsonProperty("sending_amount")
     val sendingAmount: Int,
-
-    @JsonProperty("wallet_amount")
     val walletAmount: Int
 
 
