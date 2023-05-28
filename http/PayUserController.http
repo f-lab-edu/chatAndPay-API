@@ -1,0 +1,14 @@
+### 1. PayUser 가입
+POST http://localhost:8080/pay-users/signup HTTP/1.1
+Content-Type: application/json
+
+{
+    "ci" : "ci",
+    "user_id": 16,
+    "user_seq_no" : "userSeqNo",
+    "birth_date": "20230501"
+}
+
+
+### 2. PayUser 탈퇴
+DELETE http://localhost:8080/pay-users/16 HTTP/1.1

@@ -1,19 +1,15 @@
 package com.chatandpay.api.dto
 
 import com.chatandpay.api.common.ApiResponse
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class ReceiveTransferRequestDTO(
 
-    @JsonProperty("sender_id")
     val senderId: Long,
-
-    @JsonProperty("receiver_id")
     val receiverId: Long,
-
     val amount: Int
 
 ): ApiResponse()
-
-

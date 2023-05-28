@@ -2,7 +2,7 @@ package com.chatandpay.api.service
 
 import com.chatandpay.api.dto.InquiryRealNameDTO
 import com.chatandpay.api.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.code.BANK_CODE
+import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.domain.OtherBankAccount
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
@@ -23,7 +23,7 @@ class AccountService (
     fun saveAccount(dto: OtherBankAccountRequestDTO) {
 
         val selectedUser = payUserRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
-        BANK_CODE.values().find { it.bankCode == dto.bankCode} ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
+        BankCode.values().find { it.bankCode == dto.bankCode } ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
 
         val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedUser)
 
@@ -36,9 +36,9 @@ class AccountService (
 
         if ( accountRepository.findDuplicatedAccount(account) ) {
             throw IllegalArgumentException("기 등록 계좌입니다.")
-        } else {
-            accountRepository.save(account)
         }
+
+        accountRepository.save(account)
 
     }
 
@@ -53,12 +53,11 @@ class AccountService (
         val depositedMoney = outputMoney?.let { openApiService.withdrawMoney(it) }
 
         // DB에 저장된 output 값 == API 호출 후 전달 값 비교
-        if (depositedMoney == outputMoney) {
-            return depositedMoney
-        } else {
+        if (depositedMoney != outputMoney) {
             throw RuntimeException("충전 실패")
         }
 
+        return depositedMoney
     }
 
 

@@ -1,28 +1,18 @@
 package com.chatandpay.api.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class InquiryRealNameDTO(
 
-    @JsonProperty("bank_tran_id")
+
     var bankTranId: String,
-
-    @JsonProperty("bank_code_std")
     val bankCodeStd: String,
-
-    @JsonProperty("account_num")
     val accountNum: String,
-
-    @JsonProperty("account_holder_info_type")
     var accountHolderInfoType: String = " ",
-
-    @JsonProperty("account_holder_info")
     var accountHolderInfo: String,
-
-    @JsonProperty("tran_dtime")
     var tranDtime: String,
-
-    @JsonProperty("pay_user_id")
     var payUserId: Long
 
 )

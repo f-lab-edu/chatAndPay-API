@@ -1,11 +1,13 @@
 package com.chatandpay.api.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class OpenApiAccessTokenDTO (
-    @JsonProperty("access_token") val accessToken: String,
-    @JsonProperty("token_type") val tokenType: String,
-    @JsonProperty("expires_in") val expiresIn: String,
+    val accessToken: String,
+    val tokenType: String,
+    val expiresIn: String,
     val scope: String,
-    @JsonProperty("client_use_code") val clientUseCode: String,
+    val clientUseCode: String,
 )
