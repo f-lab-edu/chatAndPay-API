@@ -45,6 +45,15 @@ internal class ExceptionHandlerController {
         return handleExceptionInternal(errorCode)
     }
 
+    @ExceptionHandler(WalletChargeAttemptException::class)
+    protected fun handleWalletChargeAttemptException(ex: WalletChargeAttemptException): ResponseEntity<ErrorResponse>? {
+        val errorEnum = if (ex.message.contains("대외계")) ErrorCode.INTERNAL_SERVER_ERROR else ErrorCode.BAD_REQUEST
+        val errorMsg = ex.message
+        val errorCode = ErrorResponse(errorEnum.value, errorMsg)
+        return handleExceptionInternal(errorCode)
+    }
+
+
     @ExceptionHandler(RestApiException::class, Exception::class)
     protected fun handleRestApiException(ex: RestApiException): ResponseEntity<ErrorResponse>? {
         return handleExceptionInternal(ex.errorResponse)
