@@ -2,8 +2,8 @@ package com.chatandpay.api.controller
 
 import com.chatandpay.api.component.AccountCheck
 import com.chatandpay.api.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.dto.DepositWalletDTO
-import org.springframework.http.HttpStatus
+import com.chatandpay.api.dto.DepositWalletRequestDTO
+import com.chatandpay.api.dto.OtherBankAccountResponseDTO
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,28 +18,20 @@ class AccountController(
 ) {
 
     @PostMapping("")
-    fun addExternalAccount(@RequestBody account: OtherBankAccountRequestDTO): ResponseEntity<Any> {
+    fun addExternalAccount(@RequestBody account: OtherBankAccountRequestDTO): ResponseEntity<OtherBankAccountResponseDTO> {
 
-        try {
-            accountCheck.saveAccount(account)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        val response = accountCheck.saveAccount(account)
+        return ResponseEntity.ok(response)
 
-        return ResponseEntity.ok("ok")
     }
 
 
     @PostMapping("/deposit")
-    fun chargeWalletfromAccount(@RequestBody depositMoney: DepositWalletDTO): ResponseEntity<Any> {
+    fun chargeWalletfromAccount(@RequestBody depositMoney: DepositWalletRequestDTO): ResponseEntity<Any> {
 
-        try {
-            accountCheck.chargeWallet(depositMoney)
-        } catch(e: Exception) {
-            return ResponseEntity(e.message, HttpStatus.BAD_REQUEST)
-        }
+        val response = accountCheck.chargeWallet(depositMoney)
+        return ResponseEntity.ok(response)
 
-        return ResponseEntity.ok("ok")
     }
 
 

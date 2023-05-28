@@ -2,6 +2,7 @@ package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.OtherBankAccount
 import com.chatandpay.api.dto.OpenApiDepositWalletDTO
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccountRepository
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -21,9 +22,11 @@ class AccountService (
 
 
     @Transactional
-    fun chargeWallet(dto: OpenApiDepositWalletDTO) : Int? {
+    fun chargeWallet(dto: OpenApiDepositWalletDTO) : OpenApiDepositWalletDTO {
 
-        return payUserService.depositintoWallet(dto.depositMoney, dto.payUser)?.wallet?.money
+        val payUser = payUserService.depositintoWallet(dto.depositMoney, dto.payUser)
+            ?: throw RestApiException()
+        return OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
 
     }
 
