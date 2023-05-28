@@ -1,8 +1,10 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.code.BankRspCode
+import com.chatandpay.api.exception.WalletChargeAttemptException
 import com.chatandpay.api.domain.AccessToken
 import com.chatandpay.api.dto.*
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccessTokenRepository
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.utils.RandomUtil
@@ -66,14 +68,14 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
                     HttpEntity(param, headers),
                     OpenApiAccessTokenDTO::class.java
                     // TODO - 타 응답 반환 시 ResponceDTO 처리
-                ) ?: throw RuntimeException("토큰 발급 실패")
+                ) ?: throw RestApiException("토큰 발급 실패")
 
                 val accessToken = AccessToken(null, res.accessToken, res.tokenType, res.expiresIn, res.tokenType, res.clientUseCode, now, now)
                 token = accessTokenRepository.save(accessToken)
 
             } catch (e: Exception) {
                 e.printStackTrace()
-                throw RuntimeException("토큰 발급 실패")
+                throw RestApiException("토큰 발급 실패")
             }
         }
 
@@ -108,8 +110,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
             uri,
             HttpEntity(jsonBody, headers),
             RealNameInquiryResponseDTO::class.java
-            // TODO - 타 응답 반환 시 ResponceDTO 처리
-        ) ?: throw RuntimeException("조회 실패")
+        ) ?: throw RestApiException("조회 실패")
 
         returnRestTemplate.bankRspCode?.let { checkBankRspCode(it) }
 
@@ -153,18 +154,26 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
         // TODO token 종류 상이함으로 인한 임시 서버 설정 필요
 
-        checkBankRspCode(testDTO.bankRspCode)
+        checkBankRspCode(testDTO.bankRspCode, "W", dto)
 
         return dto
     }
 
-    fun checkBankRspCode(bankRspCode: String) {
+    fun checkBankRspCode(bankRspCode: String, type: String? = null, dto: Any? = null) {
         if (bankRspCode != "000") {
             // bankRspCode, 응답코드(참가기관)이 정상(000)이 아닌 경우에는 ‘이체 불능’으로 간주
-            val rspCodeCtnt = BankRspCode.values().find { it.bankRspCode == bankRspCode}
-                ?: throw IllegalArgumentException("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.")
-            throw RuntimeException(rspCodeCtnt.msg)
+
+            val rspCodeCtnt = BankRspCode.values().find { it.bankRspCode == bankRspCode }
+                ?: when (type) {
+                    "W" -> throw WalletChargeAttemptException ("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.", dto as OpenApiDepositWalletDTO)
+                    else -> throw IllegalArgumentException("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.")
+                }
+
+            when (type) {
+                "W" -> throw WalletChargeAttemptException ("[대외계 에러]: ${rspCodeCtnt.msg}", dto as OpenApiDepositWalletDTO)
+                else -> throw RestApiException("[대외계 에러]: ${rspCodeCtnt.msg}")
+            }
+
         }
     }
-
 }

@@ -1,8 +1,9 @@
 package com.chatandpay.api.common
 
-import com.chatandpay.api.code.AccountAttemptCode
+import com.chatandpay.api.code.WalletChargeAttemptCode
 import com.chatandpay.api.domain.AccountApiLog
 import com.chatandpay.api.dto.OpenApiDepositWalletDTO
+import com.chatandpay.api.exception.WalletChargeAttemptException
 import com.chatandpay.api.repository.ApiResultLogRepository
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.AfterReturning
@@ -27,7 +28,7 @@ class ApiResultLoggingAspect (
     @Before("openApiCut()")
     fun beforeOpenApiWithdrawLog(joinPoint: JoinPoint) {
         transactionTemplate.execute {
-            val log = joinPointToAccountApiLog(joinPoint, AccountAttemptCode.TRY.value)
+            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.TRY.value)
             apiResultLogRepository.saveAccountApiLog(log)
         }
     }
@@ -38,7 +39,7 @@ class ApiResultLoggingAspect (
     )
     fun logChargeOpenApiWallet(joinPoint: JoinPoint, result: Any) {
         transactionTemplate.execute {
-            val log = joinPointToAccountApiLog(joinPoint, AccountAttemptCode.API_SUCCESS.value)
+            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.API_SUCCESS.value)
             apiResultLogRepository.saveAccountApiLog(log)
         }
     }
@@ -48,14 +49,36 @@ class ApiResultLoggingAspect (
         returning = "result"
     )
     fun logChargeDBWallet(joinPoint: JoinPoint, result: Any) {
-        val log = joinPointToAccountApiLog(joinPoint, AccountAttemptCode.DB_SUCCESS.value)
+        val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.DB_SUCCESS.value)
         apiResultLogRepository.saveAccountApiLog(log)
+    }
+
+    @AfterReturning(
+        pointcut = "execution(* com.chatandpay.api.exception.ExceptionHandlerController.handleWalletChargeAttemptException(..))",
+        returning = "result"
+    )
+    fun logFailChargeWallet(joinPoint: JoinPoint, result: Any) {
+
+        val ex = joinPoint.args[0] as WalletChargeAttemptException
+
+        transactionTemplate.execute {
+            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.FAIL.value)
+            apiResultLogRepository.saveAccountApiLog(log)
+        }
+
     }
 
 
     fun joinPointToAccountApiLog(joinPoint: JoinPoint, attemptCode: Int): AccountApiLog {
         val args = joinPoint.args
-        val dto = args[0] as OpenApiDepositWalletDTO
+        var dto = args[0]
+
+        if (attemptCode == -1) {
+            dto as WalletChargeAttemptException
+            dto = dto.openApiDto
+        } else {
+            dto as OpenApiDepositWalletDTO
+        }
 
         val payUser = dto.payUser
         var currentMoney = payUser.wallet?.money ?: 0
