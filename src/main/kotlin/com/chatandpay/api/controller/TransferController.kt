@@ -16,7 +16,8 @@ class TransferController (val transferService : TransferService) {
     @PostMapping("")
     fun sendTransfer(@RequestBody request: ReceiveTransferRequestDTO): ResponseEntity<ReceiveTransferResponseDTO> {
 
-        return ResponseEntity.ok(transferService.sendTransfer(request))
+        val response = transferService.sendTransfer(request)
+        return ResponseEntity.ok(response)
 
     }
 
