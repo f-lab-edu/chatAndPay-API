@@ -70,7 +70,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
                     // TODO - 타 응답 반환 시 ResponceDTO 처리
                 ) ?: throw RestApiException("토큰 발급 실패")
 
-                val accessToken = AccessToken(null, res.accessToken, res.tokenType, res.expiresIn, res.tokenType, res.clientUseCode, now, now)
+                val accessToken = AccessToken(null, res.accessToken, res.tokenType, res.expiresIn, res.tokenType, res.clientUseCode)
                 token = accessTokenRepository.save(accessToken)
 
             } catch (e: Exception) {

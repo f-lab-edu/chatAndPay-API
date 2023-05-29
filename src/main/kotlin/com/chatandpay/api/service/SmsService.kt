@@ -54,7 +54,7 @@ class SmsService(private val authRepository: AuthRepository) {
         val content = "인증 번호는 [${sixDigits}]입니다."
         val message = Message(cellphone,null, content)
 
-        val smsAuth = SmsAuthentication(null, sixDigits, cellphone, LocalDateTime.now())
+        val smsAuth = SmsAuthentication(null, sixDigits, cellphone)
 
         val auth = authRepository.save(smsAuth)
         //sendSms(message) ?: throw RuntimeException("메시지 발송 실패")
@@ -70,16 +70,15 @@ class SmsService(private val authRepository: AuthRepository) {
     fun authSendSmsConfirm(smsAuth : SmsAuthentication): SmsAuthentication? {
 
         val now = LocalDateTime.now()
-        val duration = Duration.between(smsAuth.requestTime, now)
+        val duration = Duration.between(smsAuth.createdAt, now)
 
         if(duration.toMinutes() > 3) {
             throw TimeoutException("요청 시간이 3분을 초과했습니다.")
         }
 
         smsAuth.isVerified = true
-        smsAuth.confirmTime = now
 
-       return authRepository.save(smsAuth)
+        return authRepository.save(smsAuth)
 
     }
 
