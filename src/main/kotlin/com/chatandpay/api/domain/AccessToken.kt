@@ -2,7 +2,6 @@ package com.chatandpay.api.domain
 
 import lombok.AllArgsConstructor
 import lombok.NoArgsConstructor
-import java.time.LocalDateTime
 import javax.persistence.*
 
 @Entity
@@ -30,10 +29,4 @@ data class AccessToken(
     @Column(name = "client_use_code", nullable = false)
     var clientUseCode: String,
 
-    @Column(name="created_at", nullable = false)
-    var createdAt: LocalDateTime,
-
-    @Column(name="updated_at", nullable = false)
-    var updatedAt: LocalDateTime,
-
-)
+): BaseEntity()
