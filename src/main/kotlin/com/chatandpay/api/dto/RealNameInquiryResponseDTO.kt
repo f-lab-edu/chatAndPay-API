@@ -1,5 +1,6 @@
 package com.chatandpay.api.dto
 
+import com.chatandpay.api.common.ApiResponse
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
@@ -26,4 +27,4 @@ data class RealNameInquiryResponseDTO(
     var savingsBankName: String?,
     var accountSeq: String?
 
-)
+) : ApiResponse()

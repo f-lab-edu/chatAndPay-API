@@ -1,5 +1,6 @@
 package com.chatandpay.api.dto
 
+import com.chatandpay.api.common.ApiResponse
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
@@ -15,4 +16,4 @@ data class InquiryRealNameDTO(
     var tranDtime: String,
     var payUserId: Long
 
-)
+) : ApiResponse()

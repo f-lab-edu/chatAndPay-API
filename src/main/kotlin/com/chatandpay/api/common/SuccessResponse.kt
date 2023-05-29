@@ -1,10 +1,13 @@
 package com.chatandpay.api.common
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonNaming
 import lombok.Getter
 import lombok.RequiredArgsConstructor
 
 @Getter
 @RequiredArgsConstructor
-class SuccessResponse(
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+data class SuccessResponse(
     val successMessage: String
 ) : ApiResponse()
