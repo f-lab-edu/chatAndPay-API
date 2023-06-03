@@ -68,6 +68,11 @@ class UserServiceTests {
         given(authRepository.findById(user.verificationId)).willReturn(authData)
         given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
         given(userRepository.save(regUser)).willReturn(regUser)
+        val authData = SmsAuthentication(null, "123456", "01012345678", false)
+
+        given(authRepository.findById(user.verificationId)).willReturn(authData)
+        given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
+        given(userRepository.save(user)).willReturn(user)
 
         // when
         val result = userService.register(user)
