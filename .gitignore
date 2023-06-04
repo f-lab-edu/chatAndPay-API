@@ -25,3 +25,8 @@ replay_pid*
 
 # 외부 API config
 /src/main/resources/api-keys.yml
+
+# .idea, build, gradle
+.idea/
+build/
+.gradle/
