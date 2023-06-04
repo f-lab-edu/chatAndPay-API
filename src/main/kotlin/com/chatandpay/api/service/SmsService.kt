@@ -57,7 +57,11 @@ class SmsService(private val authRepository: AuthRepository) {
         val smsAuth = SmsAuthentication(null, sixDigits, cellphone, LocalDateTime.now())
 
         val auth = authRepository.save(smsAuth)
-        sendSms(message) ?: throw RuntimeException("메시지 발송 실패")
+        //sendSms(message) ?: throw RuntimeException("메시지 발송 실패")
+        println("============== message ================")
+        println(message)
+        println("============== message ================")
+        // 외부 통신 제어를 위한 임시 주석화 - print문, DB를 통한 인증번호 확인 가능
 
         return auth?.id ?: throw RuntimeException("메시지 정보 저장 실패")
     }
