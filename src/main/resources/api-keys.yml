@@ -1,0 +1,10 @@
+sens:
+  service-id:
+  access-key:
+  secret-key:
+  sender-phone:
+openapi:
+  client-id:
+  client-secret:
+  url:
+  institution-code:
