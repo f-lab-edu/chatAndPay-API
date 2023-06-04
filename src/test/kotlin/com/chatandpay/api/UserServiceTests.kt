@@ -4,46 +4,33 @@ import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
-import com.chatandpay.api.service.PayUserService
 import com.chatandpay.api.service.UserService
 import org.junit.jupiter.api.Assertions.*
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.*
-import org.mockito.BDDMockito.given
-import org.mockito.junit.jupiter.MockitoExtension
+import org.mockito.Mockito.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.security.crypto.password.PasswordEncoder
 import javax.persistence.EntityNotFoundException
 
 @SpringBootTest
-@ExtendWith(MockitoExtension::class)
 class UserServiceTests {
 
-    @InjectMocks
-    private lateinit var userService: UserService
-
-    @Mock
-    private lateinit var payUserService: PayUserService
-
-    @Mock
-    private lateinit var userRepository: UserRepository
-
-    @Mock
+    @MockBean
     private lateinit var authRepository: AuthRepository
 
-    @Spy
-    lateinit var passwordEncoder: PasswordEncoder
+    @MockBean
+    private lateinit var userRepository: UserRepository
 
-    @BeforeEach
-    fun setUp() {
-        MockitoAnnotations.openMocks(this)
+    @Autowired
+    private lateinit var userService: UserService
 
-        //Mockito.lenient().`when`(userRepository.findByUserId(any())).thenAnswer(null)
+    @SpyBean
+    private lateinit var passwordEncoder: PasswordEncoder
 
-    }
 
 
     @Test
@@ -52,11 +39,12 @@ class UserServiceTests {
 
         // given
         val user = User(null,"01012345678",null, null, "이름", 1)
-        val authData = SmsAuthentication(null, "123456", "01012345678", false)
+        val authData = SmsAuthentication(null, "123456", "01012345678", true)
+        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId)
 
-        given(authRepository.findById(user.verificationId)).willReturn(authData)
-        given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
-        given(userRepository.save(user)).willReturn(user)
+        `when`(authRepository.findById(user.verificationId)).thenReturn(authData)
+        `when`(userRepository.findByCellphone(user.cellphone)).thenReturn(null)
+        `when`(userRepository.save(regUser)).thenReturn(regUser)
 
         // when
         val result = userService.register(user)
@@ -112,7 +100,7 @@ class UserServiceTests {
         val user = User(null,"01082828282",null, null, "테스트", 3)
         val authData = SmsAuthentication(null, "123456", "01012345678", false)
 
-        given(authRepository.findById(user.verificationId)).willReturn(authData)
+        `when`(authRepository.findById(user.verificationId)).thenReturn(authData)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.register(user) }
@@ -131,7 +119,7 @@ class UserServiceTests {
         val user = User(null,"01012345678",null, null, "테스트", 1)
         val authData = SmsAuthentication(null, "123456", "01012345678", false)
 
-        given(authRepository.findById(user.verificationId)).willReturn(authData)
+        `when`(authRepository.findById(user.verificationId)).thenReturn(authData)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.register(user) }
@@ -149,9 +137,8 @@ class UserServiceTests {
 
         // given
         val user = User(null,"","testId", "", "", -1)
-        val noIdUser = User(null,"01012345678",null, null, "이름", 1)
 
-        given(userRepository.findByUserId(user.userId!!)).willReturn(noIdUser)
+        `when`(userRepository.findByUserId(user.userId!!)).thenReturn(null)
 
         // when
         val exception: Throwable = assertThrows(EntityNotFoundException::class.java) { userService.login(user) }
@@ -170,7 +157,7 @@ class UserServiceTests {
         val user = User(null,"01012345678","testId", "testPassword", "이름", 1)
         val dbUser = User(null,"01012345678","testId", "testPassword22", "이름", 1)
 
-        given(userRepository.findByUserId(user.userId!!)).willReturn(dbUser)
+        `when`(userRepository.findByUserId(user.userId!!)).thenReturn(dbUser)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.login(user) }
@@ -189,7 +176,8 @@ class UserServiceTests {
         // given
         val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
 
-        given(userRepository.findByUserId(user.userId!!)).willReturn(user)
+        `when`(userRepository.findByUserId(user.userId!!)).thenReturn(user)
+        `when`(passwordEncoder.matches(user.password, user.password)).thenReturn(true)
 
         // when
         val result = userService.login(user)
