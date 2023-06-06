@@ -1,15 +1,8 @@
 package com.chatandpay.api.repository
 
 import com.chatandpay.api.domain.Log
-import org.springframework.data.mongodb.core.MongoTemplate
-import org.springframework.stereotype.Component
+import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
 
-
-@Component
-class LogRepository(private val mongoTemplate: MongoTemplate) {
-
-    fun saveLog(log: Log) {
-        mongoTemplate.save(log)
-    }
-
-}
+@Repository
+interface LogRepository : MongoRepository<Log, String>
