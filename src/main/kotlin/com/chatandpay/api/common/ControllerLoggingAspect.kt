@@ -1,7 +1,7 @@
 package com.chatandpay.api.common
 
 import com.chatandpay.api.domain.Log
-import com.chatandpay.api.repository.LogRepository
+import com.chatandpay.api.service.LogService
 import lombok.extern.slf4j.Slf4j
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.AfterReturning
@@ -21,13 +21,12 @@ import org.springframework.stereotype.Component
 class ControllerLoggingAspect {
 
     @Autowired
-    private lateinit var logRepository: LogRepository
+    private lateinit var logService: LogService
 
     lateinit var logger: Logger
 
     @Pointcut("execution(* com.chatandpay.api.controller..*.*(..))")
-    private fun controllerCut() {
-    }
+    private fun controllerCut() {}
 
     @Before("controllerCut()")
     fun beforeParameterLog(joinPoint: JoinPoint) {
@@ -57,7 +56,7 @@ class ControllerLoggingAspect {
                 argumentValue = argumentValue.toString()
             )
 
-            logRepository.saveLog(log)
+            logService.saveLog(log)
 
         }
 
@@ -83,7 +82,7 @@ class ControllerLoggingAspect {
             resultValue = returnObj.toString()
         )
 
-        logRepository.saveLog(log)
+        logService.saveLog(log)
 
     }
 
