@@ -1,5 +1,7 @@
 package com.chatandpay.api.common
 
+import com.chatandpay.api.domain.Log
+import com.chatandpay.api.repository.LogRepository
 import lombok.extern.slf4j.Slf4j
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.AfterReturning
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Component
 @Component
 class ControllerLoggingAspect {
 
+    @Autowired
+    private lateinit var logRepository: LogRepository
+
     lateinit var logger: Logger
 
     @Pointcut("execution(* com.chatandpay.api.controller..*.*(..))")
@@ -31,11 +36,12 @@ class ControllerLoggingAspect {
         logger = LoggerFactory.getLogger(targetClass)
 
         val methodSignature = joinPoint.signature as MethodSignature
+        val methodName = methodSignature.method.name
         val parameterTypes = methodSignature.parameterTypes
         val parameterNames = methodSignature.parameterNames
         val argumentValues = joinPoint.args
 
-        logger.info("Entering method: ${methodSignature.method.name}")
+        logger.info("Entering method: $methodName")
 
         for (i in parameterTypes.indices) {
             val parameterType = parameterTypes[i]
@@ -44,6 +50,15 @@ class ControllerLoggingAspect {
 
             logger.info("Parameter: $parameterType $parameterName = $argumentValue")
 
+            val log = Log(
+                className = targetClass.toString(),
+                methodName = methodName,
+                logType = LogType.REQUEST,
+                argumentValue = argumentValue.toString()
+            )
+
+            logRepository.saveLog(log)
+
         }
 
     }
@@ -51,9 +66,24 @@ class ControllerLoggingAspect {
     @AfterReturning(value = "controllerCut()", returning = "returnObj")
     fun afterReturnLog(joinPoint: JoinPoint, returnObj: Any) {
 
-        logger.info("Returning Class / Method: ${joinPoint.target.javaClass} ${joinPoint.signature.name}")
+        val targetClass = joinPoint.target.javaClass
+        logger = LoggerFactory.getLogger(targetClass)
+
+        val methodSignature = joinPoint.signature as MethodSignature
+        val methodName = methodSignature.method.name
+
+        logger.info("Returning Class / Method: $targetClass $methodName")
         logger.info("Returning Type: ${returnObj.javaClass.simpleName}")
         logger.info("Returning Value: $returnObj")
+
+        val log = Log(
+            className = targetClass.toString(),
+            methodName = methodName,
+            logType = LogType.RESULT,
+            resultValue = returnObj.toString()
+        )
+
+        logRepository.saveLog(log)
 
     }
 
