@@ -4,7 +4,7 @@ spring:
   profiles:
     default: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/talk_and_pay?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://localhost:3306/TALKANDPAY?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -14,6 +14,11 @@ spring:
       hibernate:
         jdbc:
           time_zone: Asia/Seoul
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: mydatabase
 sens:
   service-id: ${api-keys.sens.service-id}
   access-key: ${api-keys.sens.access-key}
