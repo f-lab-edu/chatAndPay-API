@@ -303,11 +303,12 @@ class UserServiceTests {
     fun authLoginConfirm_ExistingUser_ThrowsIllegalArgumentException() {
 
         // given
-        val smsAuth = SmsAuthentication(1, "123456", "01012341234", false)
+        val trySmsAuth = SmsAuthentication(null, "123456", "01042424242")
+        val givenSmsAuth = SmsAuthentication(null, "123456", "01042424242", false)
         val authConfirm = AuthConfirmRequestDTO("이름", "01042424242", "123456")
 
-        given(authRepository.findByCellphone(authConfirm.cellphone)).willReturn(smsAuth)
-        given(smsService.authSendSmsConfirm(smsAuth)).willReturn(smsAuth)
+        given(authRepository.findByCellphone(authConfirm.cellphone)).willReturn(givenSmsAuth)
+        given(smsService.authSendSmsConfirm(trySmsAuth)).willReturn(givenSmsAuth)
         given(userRepository.findByCellphone(authConfirm.cellphone)).willReturn(null)
 
         // when
@@ -480,20 +481,20 @@ class UserServiceTests {
         // TODO 필요 여부 파악 필요 - verify도 들어가기 모호한 위치로 보여짐
 
         // given
-        val smsAuth = SmsAuthentication(1, "123456", "01012341234", false)
-        val authCfmReq = AuthConfirmRequestDTO(smsAuth.phoneNumber, "01012341234", "123456")
-        val confirmSmsAuth = SmsAuthentication(1, "123456", "01012341234", true)
+        val trySmsAuth = SmsAuthentication(null, "121212", "01012121234")
+        val givenSmsAuth = SmsAuthentication(null, "121212", "01012121234", false)
+        val authCfmReq = AuthConfirmRequestDTO(trySmsAuth.phoneNumber, "01012121234", "121212")
 
-        given(authRepository.findByCellphone(smsAuth.phoneNumber)).willReturn(smsAuth)
-        given(smsService.authSendSmsConfirm(smsAuth)).willReturn(smsAuth)
+        given(authRepository.findByCellphone(trySmsAuth.phoneNumber)).willReturn(givenSmsAuth)
+        given(smsService.authSendSmsConfirm(trySmsAuth)).willReturn(givenSmsAuth)
 
         // when
         val result = userService.authConfirm(authCfmReq)
 
         // then
         assertNotNull(result)
-        assertEquals(smsAuth.id, result.id)
-        assertTrue(confirmSmsAuth.isVerified)
+        assertEquals(trySmsAuth.id, result.id)
+        assertTrue(trySmsAuth.isVerified)
 
     }
 
