@@ -1,102 +1,102 @@
 package com.chatandpay.api.common
 
-import com.chatandpay.api.code.WalletChargeAttemptCode
-import com.chatandpay.api.domain.AccountApiLog
-import com.chatandpay.api.dto.OpenApiDepositWalletDTO
-import com.chatandpay.api.exception.WalletChargeAttemptException
-import com.chatandpay.api.repository.ApiResultLogRepository
+import com.chatandpay.api.domain.Log
+import com.chatandpay.api.service.LogService
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.AfterReturning
 import org.aspectj.lang.annotation.Aspect
 import org.aspectj.lang.annotation.Before
 import org.aspectj.lang.annotation.Pointcut
+import org.aspectj.lang.reflect.MethodSignature
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import org.springframework.transaction.support.TransactionTemplate
 
 @Aspect
 @Component
-class ApiResultLoggingAspect (
-    private val apiResultLogRepository: ApiResultLogRepository,
-    private val transactionTemplate: TransactionTemplate
-) {
+class ApiResultLoggingAspect () {
 
-    @Pointcut("execution(* com.chatandpay.api.service.OpenApiService.withdrawMoney(..))")
-    private fun openApiCut() {
+    @Autowired
+    private lateinit var logService: LogService
 
-    }
+    lateinit var logger: Logger
+
+    @Pointcut("execution(* com.chatandpay.api.service.OpenApiService.*(..))")
+    private fun openApiCut() {}
 
     @Before("openApiCut()")
     fun beforeOpenApiWithdrawLog(joinPoint: JoinPoint) {
-        transactionTemplate.execute {
-            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.TRY.value)
-            apiResultLogRepository.saveAccountApiLog(log)
+
+        println("너되냐!!")
+
+        val targetClass = joinPoint.target.javaClass
+        logger = LoggerFactory.getLogger(targetClass)
+
+        val methodSignature = joinPoint.signature as MethodSignature
+        val methodName = methodSignature.method.name
+        val parameterTypes = methodSignature.parameterTypes
+        val parameterNames = methodSignature.parameterNames
+        val argumentValues = joinPoint.args
+
+        logger.info("Entering method: $methodName")
+
+        if (parameterTypes.isEmpty()) {
+
+            val log = Log(
+                className = targetClass.toString(),
+                methodName = methodName,
+                logType = LogType.API_REQUEST
+            )
+
+            logService.saveLog(log)
+            return
+        }
+
+        for (i in parameterTypes.indices) {
+            val parameterType = parameterTypes[i]
+            val parameterName = parameterNames[i]
+            val argumentValue = argumentValues[i]
+
+            logger.info("Parameter: $parameterType $parameterName = $argumentValue")
+
+            val log = Log(
+                className = targetClass.toString(),
+                methodName = methodName,
+                logType = LogType.API_REQUEST,
+                argumentValue = argumentValue.toString()
+            )
+
+            logService.saveLog(log)
+
         }
     }
 
     @AfterReturning(
-        pointcut = "execution(* com.chatandpay.api.service.OpenApiService.withdrawMoney(..))",
-        returning = "result"
+        pointcut = "execution(* com.chatandpay.api.service.OpenApiService.*(..))",
+        returning = "returnObj"
     )
-    fun logChargeOpenApiWallet(joinPoint: JoinPoint, result: Any) {
-        transactionTemplate.execute {
-            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.API_SUCCESS.value)
-            apiResultLogRepository.saveAccountApiLog(log)
-        }
-    }
+    fun logChargeOpenApiWallet(joinPoint: JoinPoint, returnObj: Any) {
 
-    @AfterReturning(
-        pointcut = "execution(* com.chatandpay.api.service.AccountService.chargeWallet(..))",
-        returning = "result"
-    )
-    fun logChargeDBWallet(joinPoint: JoinPoint, result: Any) {
-        val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.DB_SUCCESS.value)
-        apiResultLogRepository.saveAccountApiLog(log)
-    }
+        val targetClass = joinPoint.target.javaClass
+        logger = LoggerFactory.getLogger(targetClass)
 
-    @AfterReturning(
-        pointcut = "execution(* com.chatandpay.api.exception.ExceptionHandlerController.handleWalletChargeAttemptException(..))",
-        returning = "result"
-    )
-    fun logFailChargeWallet(joinPoint: JoinPoint, result: Any) {
+        val methodSignature = joinPoint.signature as MethodSignature
+        val methodName = methodSignature.method.name
 
-        val ex = joinPoint.args[0] as WalletChargeAttemptException
+        logger.info("Returning Class / Method: $targetClass $methodName")
+        logger.info("Returning Type: ${returnObj.javaClass.simpleName}")
+        logger.info("Returning Value: $returnObj")
 
-        transactionTemplate.execute {
-            val log = joinPointToAccountApiLog(joinPoint, WalletChargeAttemptCode.FAIL.value)
-            apiResultLogRepository.saveAccountApiLog(log)
-        }
-
-    }
-
-
-    fun joinPointToAccountApiLog(joinPoint: JoinPoint, attemptCode: Int): AccountApiLog {
-        val args = joinPoint.args
-        var dto = args[0]
-
-        if (attemptCode == -1) {
-            dto as WalletChargeAttemptException
-            dto = dto.openApiDto
-        } else {
-            dto as OpenApiDepositWalletDTO
-        }
-
-        val payUser = dto.payUser
-        var currentMoney = payUser.wallet?.money ?: 0
-        val depositMoney = dto.depositMoney
-
-        currentMoney = if (attemptCode == 2) currentMoney - depositMoney else currentMoney
-        
-        return AccountApiLog(
-            null,
-            payUser.id!!,
-            dto.accountId,
-            currentMoney,
-            currentMoney + depositMoney,
-            attemptCode
+        val log = Log(
+            className = targetClass.toString(),
+            methodName = methodName,
+            logType = LogType.API_RESULT,
+            resultValue = returnObj.toString()
         )
+
+        logService.saveLog(log)
+
     }
-
-
-
 
 }
