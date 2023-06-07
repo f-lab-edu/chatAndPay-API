@@ -18,10 +18,10 @@ import javax.persistence.MappedSuperclass
 open class BaseEntity {
     @CreatedDate
     @Column(updatable = false)
-    var createdAt: LocalDateTime? = null
+    var createdAt: LocalDateTime? = LocalDateTime.now()
         protected set
 
     @LastModifiedDate
-    var updatedAt: LocalDateTime? = null
+    var updatedAt: LocalDateTime? = LocalDateTime.now()
         protected set
 }
