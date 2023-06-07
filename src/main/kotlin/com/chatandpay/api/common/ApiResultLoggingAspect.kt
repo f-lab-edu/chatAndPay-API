@@ -28,8 +28,6 @@ class ApiResultLoggingAspect () {
     @Before("openApiCut()")
     fun beforeOpenApiWithdrawLog(joinPoint: JoinPoint) {
 
-        println("너되냐!!")
-
         val targetClass = joinPoint.target.javaClass
         logger = LoggerFactory.getLogger(targetClass)
 
