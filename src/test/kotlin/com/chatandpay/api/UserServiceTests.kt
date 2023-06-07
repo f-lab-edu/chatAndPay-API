@@ -52,6 +52,8 @@ class UserServiceTests {
     @BeforeEach
     fun setup() {
         mockkObject(RandomUtil)
+        reset(userRepository)
+        reset(authRepository)
     }
 
     @Test
