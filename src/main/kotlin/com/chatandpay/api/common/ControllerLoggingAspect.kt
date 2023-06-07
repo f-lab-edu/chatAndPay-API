@@ -42,6 +42,18 @@ class ControllerLoggingAspect {
 
         logger.info("Entering method: $methodName")
 
+        if (parameterTypes.isEmpty()) {
+
+            val log = Log(
+                className = targetClass.toString(),
+                methodName = methodName,
+                logType = LogType.REQUEST
+            )
+
+            logService.saveLog(log)
+            return
+        }
+
         for (i in parameterTypes.indices) {
             val parameterType = parameterTypes[i]
             val parameterName = parameterNames[i]
@@ -62,7 +74,10 @@ class ControllerLoggingAspect {
 
     }
 
-    @AfterReturning(value = "controllerCut()", returning = "returnObj")
+    @AfterReturning(
+        pointcut = "execution(* com.chatandpay.api.service.OpenApiService.*(..))",
+        returning = "returnObj"
+    )
     fun afterReturnLog(joinPoint: JoinPoint, returnObj: Any) {
 
         val targetClass = joinPoint.target.javaClass
