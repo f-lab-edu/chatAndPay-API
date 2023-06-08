@@ -576,7 +576,7 @@ class UserServiceTests {
         newUser.password = passwordEncoder.encode(newUser.password)
 
         given(userRepository.findById(idx)).willReturn(user)
-        given(userRepository.save(newUser)).willReturn(newUser)
+        given(userRepository.save(user)).willReturn(newUser)
 
         // when
         val result = userService.updateUser(idx, newUser)
@@ -599,7 +599,7 @@ class UserServiceTests {
         newUser.password = passwordEncoder.encode(newUser.password)
 
         given(userRepository.findById(idx)).willReturn(user)
-        given(userRepository.save(newUser)).willReturn(newUser)
+        given(userRepository.save(user)).willReturn(newUser)
 
 
         // when
@@ -622,7 +622,7 @@ class UserServiceTests {
         newUser.password = newUser.password
 
         given(userRepository.findById(idx)).willReturn(user)
-        given(userRepository.save(newUser)).willReturn(newUser)
+        given(userRepository.save(user)).willReturn(newUser)
 
         // when
         val result = userService.updateUser(idx, newUser)
