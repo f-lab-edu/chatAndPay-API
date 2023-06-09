@@ -3,6 +3,7 @@ package com.chatandpay.api.service
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,7 +103,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
         }
 
         return smsService.authSendSmsConfirm(findAuth)
-            ?: throw RuntimeException("인증 중 오류가 발생하였습니다.")
+            ?: throw RestApiException("인증 중 오류가 발생하였습니다.")
     }
 
 
