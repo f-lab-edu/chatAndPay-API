@@ -4,6 +4,7 @@ import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.dto.PayUserDTO
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.repository.WalletRepository
@@ -28,9 +29,9 @@ class PayUserService(
         val user = userRepository.findById(payUser.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
 
         val regUser = PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null, birthDate = payUser.birthDate)
-        val savedUser = payUserRepository.save(regUser) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
+        val savedUser = payUserRepository.save(regUser) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
         val wallet = Wallet(money = 0, payUser = savedUser)
-        savedUser.wallet = walletRepository.save(wallet) ?: throw RuntimeException("페이 회원 가입에 실패하였습니다.")
+        savedUser.wallet = walletRepository.save(wallet) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
 
         return savedUser.id?.let { PayUserDTO(user.name, user.cellphone, it, savedUser.userSeqNo, savedUser.birthDate) }
 
@@ -49,8 +50,7 @@ class PayUserService(
             return payUserRepository.delete(findUser)
 
         } catch (e : Exception) {
-            throw RuntimeException(e.message)
-            // TODO 이후 브랜치 머지 시 RestApiException 변경
+            throw RestApiException(e.message)
         }
 
     }
