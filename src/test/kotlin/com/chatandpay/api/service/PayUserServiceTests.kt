@@ -1,4 +1,4 @@
-package com.chatandpay.api
+package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.User
@@ -7,7 +7,6 @@ import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.repository.WalletRepository
-import com.chatandpay.api.service.PayUserService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName

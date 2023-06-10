@@ -1,4 +1,4 @@
-package com.chatandpay.api
+package com.chatandpay.api.service
 
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.User
@@ -7,9 +7,6 @@ import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
-import com.chatandpay.api.service.PayUserService
-import com.chatandpay.api.service.SmsService
-import com.chatandpay.api.service.UserService
 import com.chatandpay.api.utils.RandomUtil
 import io.mockk.every
 import io.mockk.mockkObject
