@@ -1,7 +1,6 @@
-package com.chatandpay.api
+package com.chatandpay.api.repository
 
 import com.chatandpay.api.domain.User
-import com.chatandpay.api.repository.UserRepository
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
