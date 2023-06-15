@@ -1,5 +1,6 @@
 package com.chatandpay.api.service
 
+import com.chatandpay.api.code.ErrorCode
 import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Wallet
@@ -48,7 +49,7 @@ class PayUserService(
         countUndoneTransfer += transferRepository.findUnreceivedTransfer(findUser)
 
         if(countUndoneTransfer > 0) {
-            throw RestApiException("송금이 완료되지 않은 거래가 존재합니다.")
+            throw RestApiException("송금이 완료되지 않은 거래가 존재합니다.", ErrorCode.BAD_REQUEST)
         }
 
         try {
