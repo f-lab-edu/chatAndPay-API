@@ -6,6 +6,7 @@ import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.dto.PayUserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.PayUserRepository
+import com.chatandpay.api.repository.TransferRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.repository.WalletRepository
 import org.springframework.stereotype.Service
@@ -16,7 +17,8 @@ import javax.transaction.Transactional
 class PayUserService(
     private val payUserRepository: PayUserRepository,
     private val userRepository: UserRepository,
-    private val walletRepository : WalletRepository
+    private val walletRepository : WalletRepository,
+    private val transferRepository: TransferRepository
 ) {
 
     @Transactional
@@ -42,6 +44,12 @@ class PayUserService(
 
         val findUser = payUserRepository.findByUserId(userId) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
         val findUserWallet = findUser.id?.let { walletRepository.findByPayUserId(it) }
+        var countUndoneTransfer = transferRepository.findUnsentTransfer(findUser)
+        countUndoneTransfer += transferRepository.findUnreceivedTransfer(findUser)
+
+        if(countUndoneTransfer > 0) {
+            throw RestApiException("송금이 완료되지 않은 거래가 존재합니다.")
+        }
 
         try {
             if (findUserWallet != null) {
