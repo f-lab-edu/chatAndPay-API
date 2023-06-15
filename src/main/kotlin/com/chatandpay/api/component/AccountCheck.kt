@@ -11,6 +11,8 @@ import com.chatandpay.api.service.OpenApiService
 import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Component
 import javax.persistence.EntityNotFoundException
+import javax.transaction.Transactional
+
 @RequiredArgsConstructor
 @Component
 class AccountCheck  (
@@ -35,6 +37,7 @@ class AccountCheck  (
 
     }
 
+    @Transactional
     fun saveAccount(dto: OtherBankAccountRequestDTO) : OtherBankAccountResponseDTO {
 
         val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
