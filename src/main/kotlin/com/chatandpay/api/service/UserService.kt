@@ -151,12 +151,13 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
-        try {if(payUserService.isPayUser(id)) {
+        try {
+            if(payUserService.isPayUser(id)) {
                 payUserService.withdrawPayService(id)
             }
             return userRepository.delete(findUser)
-        }catch (e : Exception) {
-            throw Exception(e.message)
+        } catch (e : Exception) {
+            throw RestApiException(e.message)
         }
 
     }

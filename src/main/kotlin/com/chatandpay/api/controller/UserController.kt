@@ -95,7 +95,7 @@ class UserController(val userService: UserService) {
 
 
     @DeleteMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long): ResponseEntity<ApiResponse>{
+    fun deleteUser(@PathVariable("id") id: Long): ResponseEntity<ApiResponse>{
 
         val deletedYn = userService.deleteUser(id)
 
