@@ -48,7 +48,7 @@ class AccountCheck  (
 
         val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedUser)
 
-        if ( selectAccount.accountHolderName != selectedUser.user.name ) {
+        if ( selectAccount.accountHolderName != selectedUser.user?.name ) {
             throw IllegalArgumentException("조회 계좌와 고객명이 다릅니다.")
         }
 
