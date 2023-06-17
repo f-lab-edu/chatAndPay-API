@@ -6,10 +6,7 @@ import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.dto.PayUserDTO
 import com.chatandpay.api.exception.RestApiException
-import com.chatandpay.api.repository.PayUserRepository
-import com.chatandpay.api.repository.TransferRepository
-import com.chatandpay.api.repository.UserRepository
-import com.chatandpay.api.repository.WalletRepository
+import com.chatandpay.api.repository.*
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
@@ -62,6 +59,11 @@ class PayUserService(
 
         try {
             if (findUserWallet != null) {
+
+                if(findUserWallet.money > 0) {
+                    throw RestApiException("지갑에 잔액이 존재합니다.", ErrorCode.BAD_REQUEST)
+                }
+
                 val isWalletRemoved = walletRepository.delete(findUserWallet)
                 if(isWalletRemoved) {
                     findUser.user = null
