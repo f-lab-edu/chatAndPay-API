@@ -1,10 +1,12 @@
 package com.chatandpay.api.domain
 
 import com.fasterxml.jackson.annotation.JsonBackReference
+import com.querydsl.core.annotations.QueryEntity
 import javax.persistence.*
 
 @Entity
 @Table(uniqueConstraints = [UniqueConstraint(columnNames = ["bankCode", "accountNumber"])])
+@QueryEntity
 data class OtherBankAccount(
 
     @Id

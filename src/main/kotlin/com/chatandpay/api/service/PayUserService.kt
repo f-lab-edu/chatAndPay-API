@@ -16,7 +16,8 @@ class PayUserService(
     private val payUserRepository: PayUserRepository,
     private val userRepository: UserRepository,
     private val walletRepository : WalletRepository,
-    private val transferRepository: TransferRepository
+    private val transferRepository: TransferRepository,
+    private val accountRepository: AccountRepository
 ) {
 
     @Transactional
@@ -69,6 +70,8 @@ class PayUserService(
                     findUser.user = null
                     findUser.wallet = null
                     findUser.withdrawnYn = "Y"
+
+                    accountRepository.deleteAllAccount(findUser.id!!)
                     return payUserRepository.delete(findUser)
                 }
             }
