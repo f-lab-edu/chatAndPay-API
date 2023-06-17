@@ -34,7 +34,7 @@ class PayUserRepository {
 
     fun delete(user: PayUser) : Boolean {
          return try {
-             entityManager.persist(user)
+             entityManager.merge(user)
              true
         } catch (e: Exception) {
              false
