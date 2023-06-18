@@ -1,9 +1,12 @@
 package com.chatandpay.api.service
 
 
+import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.domain.OtherBankTransfer
 import com.chatandpay.api.domain.Transfer
+import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.dto.*
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.TransferRepository
@@ -78,11 +81,25 @@ class TransferService (
     }
 
 
+    @Transactional
+    fun sendMyOtherBankTransfer(dto: RegOtherBankTransferRequestDTO) : OtherBankTransferResponseDTO? {
+
+        val findReceiveAccount = accountRepository.findById(dto.senderBankAccount) ?: throw EntityNotFoundException("수신 계좌를 찾을 수 없습니다.")
+
+        if (findReceiveAccount.payUser.id != dto.senderId) {
+            throw IllegalArgumentException("수신 계좌의 명의가 송신자의 계좌와 다릅니다.")
+        }
+
+        val otherBankTransferRequest = OtherBankTransferRequestDTO(dto.senderId, findReceiveAccount.bankCode, findReceiveAccount.accountNumber, dto.amount)
+
+        return sendOtherBankTransfer(otherBankTransferRequest)
+    }
+
+
+    @Transactional
     fun sendOtherBankTransfer(dto: OtherBankTransferRequestDTO) : OtherBankTransferResponseDTO? {
 
         val findSendUser = payUserRepository.findById(dto.senderId) ?: throw EntityNotFoundException("송신자를 찾을 수 없습니다.")
-        val findReceiveAccount = accountRepository.findById(dto.senderBankAccount) ?: throw EntityNotFoundException("수신 계좌를 찾을 수 없습니다.")
-        if(findReceiveAccount.payUser.id != dto.senderId) throw IllegalArgumentException("수신 계좌의 명의가 송신자의 계좌와 다릅니다.")
         val findSenderWallet = findSendUser.wallet ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
         val findSenderWalletAmount = findSenderWallet.money
 
@@ -90,17 +107,34 @@ class TransferService (
             throw IllegalArgumentException("출금 잔액이 부족합니다.")
         }
 
-        val transferDto = OtherBankTransfer(UUID.randomUUID(), findSendUser, findReceiveAccount, dto.amount, false,"O")
-        val savedTransfer = transferRepository.save(transferDto)
+        BankCode.values().find { it.bankCode == dto.bankCode } ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
+        val transferDto = OtherBankTransfer(UUID.randomUUID(), findSendUser, dto.bankCode, dto.accountNumber, dto.amount, false,"O")
 
-        return savedTransfer?.let {
-            OtherBankTransferResponseDTO(
-                transferUuid = it.uuid,
-                isSucceeded = false,
-                sendingAmount = it.amount,
-                walletAmount = findSendUser.wallet?.money ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
-            )
+        try {
+            return finalizeOtherBankTransfer(transferDto, findSenderWallet)?.let {
+                OtherBankTransferResponseDTO(
+                    transferUuid = it.uuid,
+                    isSucceeded = true,
+                    sendingAmount = it.amount,
+                    walletAmount = findSendUser.wallet?.money ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
+                )
+            }
+
+        } catch (e: Exception){
+            throw RestApiException(e.message)
         }
+
+    }
+
+
+
+    @Transactional
+    fun finalizeOtherBankTransfer(transferDto: OtherBankTransfer, findSenderWallet: Wallet) : OtherBankTransfer? {
+        // TODO 통신부 => 외부 통신 후 실제 송금 완료 처리 부분
+        transferDto.transferred = true
+        findSenderWallet.money = findSenderWallet.money - transferDto.amount
+        walletRepository.save(findSenderWallet)
+        return transferRepository.save(transferDto)
     }
 
 

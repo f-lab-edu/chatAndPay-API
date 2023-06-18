@@ -36,6 +36,14 @@ class TransferController (val transferService : TransferService) {
 
     }
 
+    @PostMapping("/registered")
+    fun sendMyOtherBankTransfer(@RequestBody request: RegOtherBankTransferRequestDTO): ResponseEntity<OtherBankTransferResponseDTO> {
+
+        val response = transferService.sendMyOtherBankTransfer(request)
+        return ResponseEntity.ok(response)
+
+    }
+
 
 
 }

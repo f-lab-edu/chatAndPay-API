@@ -18,15 +18,14 @@ data class OtherBankTransfer(
     @JoinColumn(name = "sender_id")
     val sender: PayUser,
 
-    @OneToOne
-    @JoinColumn(name = "receiver_account")
-    val receiverAccount: OtherBankAccount,
+    val bankCode: String,
+
+    val accountNumber: String,
 
     val amount: Int,
 
     @Column(name = "transferred_yn")
     var transferred: Boolean,
-
 
     var transferType: String = "O"
 
