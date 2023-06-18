@@ -4,11 +4,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class OtherBankTransferRequestDTO(
+data class RegOtherBankTransferRequestDTO(
 
     val senderId: Long,
-    val bankCode: String,
-    val accountNumber: String,
+    val senderBankAccount: Long,
     val amount: Int
 
 )
