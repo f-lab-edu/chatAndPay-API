@@ -8,7 +8,7 @@ import javax.persistence.*
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-data class Transfer(
+data class OtherBankTransfer(
 
     @Id
     @Column(columnDefinition = "BINARY(16)")
@@ -19,14 +19,16 @@ data class Transfer(
     val sender: PayUser,
 
     @OneToOne
-    @JoinColumn(name = "receiver_id")
-    val receiver: PayUser,
+    @JoinColumn(name = "receiver_account")
+    val receiverAccount: OtherBankAccount,
 
     val amount: Int,
 
     @Column(name = "transferred_yn")
     var transferred: Boolean,
 
-    var transferType: String = "I"
+
+    var transferType: String = "O"
+
 
 ) : BaseEntity()

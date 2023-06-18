@@ -1,5 +1,6 @@
 package com.chatandpay.api.repository
 
+import com.chatandpay.api.domain.OtherBankTransfer
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Transfer
 import org.springframework.stereotype.Repository
@@ -14,6 +15,11 @@ class TransferRepository {
     private lateinit var entityManager: EntityManager
 
     fun save(transfer: Transfer): Transfer? {
+        entityManager.persist(transfer)
+        return transfer
+    }
+
+    fun save(transfer: OtherBankTransfer): OtherBankTransfer? {
         entityManager.persist(transfer)
         return transfer
     }
