@@ -25,8 +25,6 @@ data class Transfer(
     val amount: Int,
 
     @Column(name = "transferred_yn")
-    var transferred: Boolean,
-
-    var transferType: String = "I"
+    var transferred: Boolean
 
 ) : BaseEntity()

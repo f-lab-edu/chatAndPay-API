@@ -25,9 +25,7 @@ data class OtherBankTransfer(
     val amount: Int,
 
     @Column(name = "transferred_yn")
-    var transferred: Boolean,
-
-    var transferType: String = "O"
+    var transferred: Boolean
 
 
 ) : BaseEntity()
