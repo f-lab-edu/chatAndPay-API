@@ -28,7 +28,7 @@ class TransferController (val transferService : TransferService) {
 
     }
 
-    @PostMapping("")
+    @PostMapping("/interbank")
     fun sendOtherBankTransfer(@RequestBody request: OtherBankTransferRequestDTO): ResponseEntity<OtherBankTransferResponseDTO> {
 
         val response = transferService.sendOtherBankTransfer(request)
