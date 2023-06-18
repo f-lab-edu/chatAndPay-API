@@ -40,7 +40,7 @@ class TransferService (
         findSenderWallet.money = findSenderWallet.money - dto.amount
         walletRepository.save(findSenderWallet)
 
-        val transferDto = Transfer(UUID.randomUUID(), findSendUser, findReceiveUser, dto.amount, false, "I")
+        val transferDto = Transfer(UUID.randomUUID(), findSendUser, findReceiveUser, dto.amount, false)
         val savedTransfer = transferRepository.save(transferDto)
 
         return savedTransfer?.let {
@@ -108,7 +108,7 @@ class TransferService (
         }
 
         BankCode.values().find { it.bankCode == dto.bankCode } ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
-        val transferDto = OtherBankTransfer(UUID.randomUUID(), findSendUser, dto.bankCode, dto.accountNumber, dto.amount, false,"O")
+        val transferDto = OtherBankTransfer(UUID.randomUUID(), findSendUser, dto.bankCode, dto.accountNumber, dto.amount, false)
 
         try {
             return finalizeOtherBankTransfer(transferDto, findSenderWallet)?.let {
