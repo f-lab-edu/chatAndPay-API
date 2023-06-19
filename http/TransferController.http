@@ -31,3 +31,6 @@ Content-Type: application/json
   "sender_bank_account" : 1,
   "amount"      : 100
 }
+
+### 5. 송금 대기 건 확인
+GET http://localhost:8080/transfers/pending/2 HTTP/1.1
