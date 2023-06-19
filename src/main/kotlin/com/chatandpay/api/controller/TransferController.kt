@@ -49,10 +49,18 @@ class TransferController (val transferService : TransferService) {
 
         // TODO 로그인 유지 (세션 등) 구현 후 sender부 변경
         val response = transferService.getPendingTransfers(id)
-        return  ResponseEntity.ok(response)
+        return ResponseEntity.ok(response)
 
     }
 
+
+    @PostMapping("/change")
+    fun changePendingTransferState(@RequestBody request: ChangePendingTransferRequestDTO) : ResponseEntity<ChangePendingTransferResponseDTO> {
+
+        val response = transferService.changePendingTransferState(request)
+        return ResponseEntity.ok(response)
+
+    }
 
 
 }

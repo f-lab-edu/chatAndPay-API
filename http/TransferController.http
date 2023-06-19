@@ -3,9 +3,9 @@ POST http://localhost:8080/transfers HTTP/1.1
 Content-Type: application/json
 
 {
-  "sender_id"   : 5,
-  "receiver_id" : 7,
-  "amount"      : 100
+  "sender_id"   : 2,
+  "receiver_id" : 27,
+  "amount"      : 200
 }
 
 ### 2. 당행 송금하기 (수신)
@@ -33,4 +33,29 @@ Content-Type: application/json
 }
 
 ### 5. 송금 대기 건 확인
-GET http://localhost:8080/transfers/pending/2 HTTP/1.1
+GET http://localhost:8080/transfers/pending/3 HTTP/1.1
+
+
+### 6.1 송금 이전 (단일 건)
+POST http://localhost:8080/transfers/change HTTP/1.1
+Content-Type: application/json
+
+{
+
+  "uuid": "c93d9996-7057-4e15-a601-7b4cf10b6e15",
+  "request_user_id": "3",
+  "change_type": "master"
+
+}
+
+### 6.2 송금 취소 (단일 건)
+POST http://localhost:8080/transfers/change HTTP/1.1
+Content-Type: application/json
+
+{
+  
+  "uuid": "2e87d422-7143-4198-b95d-b15897afafa6",
+  "request_user_id": "3",
+  "change_type": "cancel"
+ 
+}
