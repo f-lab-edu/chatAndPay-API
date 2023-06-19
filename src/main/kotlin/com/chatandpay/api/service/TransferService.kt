@@ -139,4 +139,17 @@ class TransferService (
 
 
 
+    fun getPendingTransfers(id: Long) : List<PendingTransferDTO> {
+
+        val findUser = payUserRepository.findByUserId(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val countUndoneTransferList = transferRepository.findPendingTransfers(findUser)
+        val pendingTransferList : MutableList<PendingTransferDTO> = mutableListOf()
+
+        for (i in countUndoneTransferList){
+            pendingTransferList += PendingTransferDTO(i.uuid, i.sender.id!!, i.receiver.id!!, i.amount)
+        }
+
+        return pendingTransferList.toList()
+    }
+
 }
