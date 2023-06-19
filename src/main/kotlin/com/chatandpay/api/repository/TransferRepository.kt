@@ -40,4 +40,14 @@ class TransferRepository {
         return query.resultList
     }
 
+    fun findPendingTransfers(payUser: PayUser): List<Transfer> {
+        val query = entityManager.createQuery(
+            "SELECT t FROM Transfer t WHERE (t.sender = :payUser OR t.receiver = :payUser) AND t.transferred = false",
+            Transfer::class.java
+        )
+        query.setParameter("payUser", payUser)
+        return query.resultList
+    }
+
+
 }

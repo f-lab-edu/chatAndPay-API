@@ -51,8 +51,7 @@ class PayUserService(
 
         val findUser = payUserRepository.findByUserId(userId) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
         val findUserWallet = findUser.id?.let { walletRepository.findByPayUserId(it) }
-        val countUndoneTransfer = transferRepository.findUnsentTransfer(findUser).toMutableList()
-        countUndoneTransfer += transferRepository.findUnreceivedTransfer(findUser)
+        val countUndoneTransfer = transferRepository.findPendingTransfers(findUser)
 
         if(countUndoneTransfer.isNotEmpty()) {
             throw RestApiException("송금이 완료되지 않은 거래가 존재합니다.", ErrorCode.BAD_REQUEST)
