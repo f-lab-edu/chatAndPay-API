@@ -28,16 +28,16 @@ class TransferRepository {
         return entityManager.find(Transfer::class.java, id)
     }
 
-    fun findUnsentTransfer(payUser: PayUser): Int {
+    fun findUnsentTransfer(payUser: PayUser): List<Transfer> {
         val query = entityManager.createQuery("SELECT t FROM Transfer t WHERE t.sender = :payUser AND t.transferred = false", Transfer::class.java)
         query.setParameter("payUser", payUser)
-        return query.resultList.size
+        return query.resultList
     }
 
-    fun findUnreceivedTransfer(payUser: PayUser): Int {
+    fun findUnreceivedTransfer(payUser: PayUser): List<Transfer> {
         val query = entityManager.createQuery("SELECT t FROM Transfer t WHERE t.receiver = :payUser AND t.transferred = false", Transfer::class.java)
         query.setParameter("payUser", payUser)
-        return query.resultList.size
+        return query.resultList
     }
 
 }
