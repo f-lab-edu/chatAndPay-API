@@ -1,12 +1,11 @@
 package com.chatandpay.api.domain
 
 import org.springframework.data.mongodb.core.mapping.Document
-import java.util.*
 
 @Document(collection = "transfer_change_logs")
 data class TransferChangeLog(
-    val beforeUuid: UUID,
-    val afterUuid: UUID,
+    val beforeUuid: String,
+    val afterUuid: String,
     val changeType: String,
     val isSucceed: Boolean,
     var beforeSender: Long? = null,
