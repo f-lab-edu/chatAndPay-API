@@ -3,9 +3,7 @@ package com.chatandpay.api.service
 
 import com.chatandpay.api.code.BankCode
 import com.chatandpay.api.config.Constant.Companion.MASTER_PAY_USER_CI
-import com.chatandpay.api.domain.OtherBankTransfer
-import com.chatandpay.api.domain.Transfer
-import com.chatandpay.api.domain.Wallet
+import com.chatandpay.api.domain.*
 import com.chatandpay.api.dto.*
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccountRepository
@@ -23,7 +21,8 @@ class TransferService (
     private val walletRepository : WalletRepository,
     private val transferRepository: TransferRepository,
     private val accountRepository: AccountRepository,
-    private val payUserService : PayUserService
+    private val payUserService : PayUserService,
+    private val logService: LogService
 ){
 
     @Transactional
@@ -154,43 +153,40 @@ class TransferService (
     }
 
     @Transactional
-    fun changePendingTransferState(transferDto: ChangePendingTransferRequestDTO) : ChangePendingTransferResponseDTO {
+    fun changePendingTransferState(changeReq: ChangePendingTransferRequestDTO) : ChangePendingTransferResponseDTO {
 
-        val transfer = transferRepository.findById(transferDto.uuid) ?: throw EntityNotFoundException("UUID 입력이 잘못되었습니다.")
+        val beforeTransfer = transferRepository.findById(changeReq.uuid) ?: throw EntityNotFoundException("UUID 입력이 잘못되었습니다.")
 
-        if(transfer.transferred){
+        if(beforeTransfer.transferred){
             throw EntityNotFoundException("이미 송금이 완료된 거래입니다.")
         }
 
-        if (transfer.sender.user!!.id != transferDto.requestUserId) {
+        if (beforeTransfer.sender.user!!.id != changeReq.requestUserId) {
             // TODO 로그인 유지 (세션 등) 구현 후 requestUserId부 변경
             throw IllegalArgumentException("변경 요청자와 거래의 송신인이 다릅니다.")
         }
 
-        val isSucceed: Boolean = when (transferDto.changeType) {
-            "cancel" -> changePendingTransferStateCancel(transfer)
-            "master" -> changePendingTransferStateMaster(transfer)
+        val afterTransfer: Transfer = when (changeReq.changeType) {
+            "cancel" -> changePendingTransferStateCancel(beforeTransfer)
+            "master" -> changePendingTransferStateMaster(beforeTransfer)
             else -> throw IllegalArgumentException("유효한 요청 방식이 아닙니다.")
         }
 
-        val returnDto = ChangePendingTransferResponseDTO(isSucceed = isSucceed, 0)
+        beforeTransfer.transferred = true
+        transferRepository.save(beforeTransfer)
 
-        if (isSucceed) {
-            returnDto.isSucceed = true
-            transfer.transferred = true
-        }
+        val returnDto = ChangePendingTransferResponseDTO(isSucceed = true, 0)
+        returnDto.remainPendingTransfer = transferRepository.findPendingTransfers(beforeTransfer.sender).size
 
-        transferRepository.save(transfer)
-
-        returnDto.remainPendingTransfer = transferRepository.findPendingTransfers(transfer.sender).size
+        logModifyTransfer(changeReq, beforeTransfer, afterTransfer)
 
         return returnDto
     }
 
     @Transactional
-    fun changePendingTransferStateCancel(transfer: Transfer): Boolean {
+    fun changePendingTransferStateCancel(transfer: Transfer): Transfer {
         val transferDto = Transfer(UUID.randomUUID(), transfer.sender, transfer.sender, transfer.amount, true)
-        transferRepository.save(transferDto)
+        val afterTransfer = transferRepository.save(transferDto) ?: throw RestApiException("송금 취소 실패")
 
         val senderWallet = transfer.sender.id?.let { walletRepository.findByPayUserId(it) }
         val beforeAmount = senderWallet?.money ?: throw RestApiException("송금 취소 실패")
@@ -198,16 +194,33 @@ class TransferService (
 
         senderWallet.money = afterAmount
         walletRepository.save(senderWallet)
+        if(transfer.amount != afterAmount.minus(beforeAmount)) throw RestApiException("송금 취소 실패")
 
-        return transfer.amount == afterAmount.minus(beforeAmount)
+        return afterTransfer
     }
 
     @Transactional
-    fun changePendingTransferStateMaster(transfer: Transfer): Boolean {
+    fun changePendingTransferStateMaster(transfer: Transfer): Transfer {
         val master = payUserRepository.findByCi(MASTER_PAY_USER_CI) ?: throw RestApiException("Master Setting Error")
         val transferDto = Transfer(UUID.randomUUID(), master, transfer.receiver, transfer.amount, false)
-        val afterTransfer = transferRepository.save(transferDto)
-        return afterTransfer != null
+        return transferRepository.save(transferDto) ?: throw RestApiException("송금 변경 실패")
+    }
+
+    fun logModifyTransfer(changeReq: ChangePendingTransferRequestDTO, beforeTransfer: Transfer, afterTransfer: Transfer) {
+        val log = TransferChangeLog(changeReq.uuid, afterTransfer.uuid, changeReq.changeType, true)
+
+        when (changeReq.changeType) {
+            "cancel" -> {
+                log.beforeReceiver = beforeTransfer.receiver.id
+                log.afterReceiver = afterTransfer.receiver.id
+            }
+            "master" -> {
+                log.beforeSender = beforeTransfer.sender.id
+                log.afterSender = afterTransfer.sender.id
+            }
+        }
+
+        logService.saveTransferChangeLog(log)
     }
 
 }
