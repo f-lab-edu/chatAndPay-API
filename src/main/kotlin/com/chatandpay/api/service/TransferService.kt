@@ -207,7 +207,7 @@ class TransferService (
     }
 
     fun logModifyTransfer(changeReq: ChangePendingTransferRequestDTO, beforeTransfer: Transfer, afterTransfer: Transfer) {
-        val log = TransferChangeLog(changeReq.uuid, afterTransfer.uuid, changeReq.changeType, true)
+        val log = TransferChangeLog(changeReq.uuid.toString(), afterTransfer.uuid.toString(), changeReq.changeType, true)
 
         when (changeReq.changeType) {
             "cancel" -> {
