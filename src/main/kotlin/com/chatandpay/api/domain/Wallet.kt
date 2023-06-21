@@ -1,5 +1,6 @@
 package com.chatandpay.api.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import lombok.AllArgsConstructor
 import lombok.NoArgsConstructor
 import javax.persistence.*
@@ -16,6 +17,7 @@ data class Wallet(
     var money: Int,
     @OneToOne
     @JoinColumn(name = "pay_user_id")
+    @JsonIgnore
     val payUser: PayUser
 ) {
     override fun toString(): String {

@@ -18,9 +18,15 @@ data class PayUser(
     val ci: String,
     @OneToOne
     @JoinColumn(name = "user_id")
-    val user: User,
+    var user: User? = null,
     val userSeqNo: String,
     val birthDate: String,
     @OneToOne(mappedBy = "payUser", cascade = [CascadeType.ALL])
-    var wallet: Wallet? = null
-)
+    var wallet: Wallet? = null,
+    var withdrawnYn: String = "N"
+
+){
+    val isWithdrawn: Boolean
+        get() = withdrawnYn == "Y"
+
+}

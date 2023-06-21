@@ -9,6 +9,7 @@ import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.dto.AuthConfirmResponseDTO
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
 import com.chatandpay.api.dto.AuthLoginUserRequestDTO
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -41,7 +42,7 @@ class UserController(val userService: UserService) {
     @PostMapping("/auth/signup")
     fun authJoinUser(@RequestBody user: User) : ResponseEntity<SuccessResponse>{
 
-        userService.authJoin(user) ?: throw RuntimeException("인증 요청 중 오류가 발생하였습니다.")
+        userService.authJoin(user) ?: throw RestApiException("인증 요청 중 오류가 발생하였습니다.")
 
         val responseBody = SuccessResponse("메시지 발송 성공")
 
@@ -94,7 +95,7 @@ class UserController(val userService: UserService) {
 
 
     @DeleteMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long): ResponseEntity<ApiResponse>{
+    fun deleteUser(@PathVariable("id") id: Long): ResponseEntity<ApiResponse>{
 
         val deletedYn = userService.deleteUser(id)
 

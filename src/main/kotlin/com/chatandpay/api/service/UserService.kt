@@ -3,6 +3,7 @@ package com.chatandpay.api.service
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
+import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -102,7 +103,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
         }
 
         return smsService.authSendSmsConfirm(findAuth)
-            ?: throw RuntimeException("인증 중 오류가 발생하였습니다.")
+            ?: throw RestApiException("인증 중 오류가 발생하였습니다.")
     }
 
 
@@ -150,12 +151,13 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
-        try {if(payUserService.isPayUser(id)) {
+        try {
+            if(payUserService.isPayUser(id)) {
                 payUserService.withdrawPayService(id)
             }
             return userRepository.delete(findUser)
-        }catch (e : Exception) {
-            throw Exception(e.message)
+        } catch (e : Exception) {
+            throw RestApiException(e.message)
         }
 
     }

@@ -63,7 +63,8 @@ class UserRepository {
 
     fun delete(user: User) : Boolean {
          return try {
-             entityManager.remove(user)
+             val managedUser = entityManager.merge(user)
+             entityManager.remove(managedUser)
              true
         } catch (e: Exception) {
              false

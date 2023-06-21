@@ -2,7 +2,7 @@ package com.chatandpay.api.dto
 
 import com.chatandpay.api.common.ApiResponse
 
-class PayUserDTO (
+data class PayUserDTO (
 
     var name: String,
     var cellphone: String,

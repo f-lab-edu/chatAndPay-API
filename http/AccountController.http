@@ -3,11 +3,11 @@ POST http://localhost:8080/accounts HTTP/1.1
 Content-Type: application/json
 
 {
-  "bank_code": "092",
-  "account_number": "1234567890123451",
-  "account_name": "토스토스",
+  "bank_code": "090",
+  "account_number": "3333037898989",
+  "account_name": "카뱅카뱅",
   "auto_debit_agree": "Y",
-  "user_id": "5"
+  "user_id": "1"
 }
 
 ### 2. 타행 계좌에서 지갑 충전
