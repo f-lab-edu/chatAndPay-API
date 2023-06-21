@@ -6,15 +6,19 @@ import com.chatandpay.api.dto.*
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
+import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.service.AccountService
 import com.chatandpay.api.service.OpenApiService
 import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Component
 import javax.persistence.EntityNotFoundException
+import javax.transaction.Transactional
+
 @RequiredArgsConstructor
 @Component
 class AccountCheck  (
     val accountRepository : AccountRepository,
+    val userRepository: UserRepository,
     val payUserRepository: PayUserRepository,
     val openApiService: OpenApiService,
     val accountService: AccountService,
@@ -35,17 +39,20 @@ class AccountCheck  (
 
     }
 
+    @Transactional
     fun saveAccount(dto: OtherBankAccountRequestDTO) : OtherBankAccountResponseDTO {
 
         val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
 
-        val selectedUser = payUserRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
+        val selectedUser = userRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
+        val selectedPayUser = selectedUser.id?.let { payUserRepository.findById(it) } ?: throw IllegalArgumentException("페이 서비스에 가입되어 있지 않은 유저입니다.")
+
         BankCode.values().find { it.bankCode == dto.bankCode} ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
 
-        val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedUser)
+        val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedPayUser)
 
-        if ( selectAccount.accountHolderName != selectedUser.user.name ) {
+        if ( selectAccount.accountHolderName != selectedUser.name ) {
             throw IllegalArgumentException("조회 계좌와 고객명이 다릅니다.")
         }
 

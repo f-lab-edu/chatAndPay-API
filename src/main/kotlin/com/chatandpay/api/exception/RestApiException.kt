@@ -8,8 +8,11 @@ import lombok.RequiredArgsConstructor
 
 @Getter
 @RequiredArgsConstructor
-class RestApiException(message : String? = null) : RuntimeException() {
-    private val errorEnum = ErrorCode.INTERNAL_SERVER_ERROR
+class RestApiException(message : String? = null, errorCd: ErrorCode? = null) : RuntimeException() {
+    private val errorEnum = errorCd ?: ErrorCode.INTERNAL_SERVER_ERROR
     private val errorMsg = message ?: "Server error."
+    override val message: String
+        get() = errorMsg
+
     val errorResponse = ErrorResponse(errorEnum.value, errorMsg)
 }
