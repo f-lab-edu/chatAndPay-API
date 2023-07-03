@@ -1,10 +1,10 @@
 sens:
-  service-id:
-  access-key:
-  secret-key:
-  sender-phone:
+  service-id: ncp:sms:kr:287007728949:talkandpay
+  access-key: 4XzkbTEaNVJimv14c5s7
+  secret-key: 1agKYK3j8CoFbCL4mmyOZekkHkObtL6NMM8l2QFs
+  sender-phone: 01072808790
 openapi:
-  client-id:
-  client-secret:
-  url:
-  institution-code:
+  client-id: 2232c401-f197-4dd0-ac98-cf4a4ff1792d
+  client-secret: a45ef5fd-f59f-4e49-8dc9-8e1cd4ff5f66
+  url: https://testapi.openbanking.or.kr
+  institution-code: M202300836
