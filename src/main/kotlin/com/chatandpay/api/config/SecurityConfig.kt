@@ -22,10 +22,8 @@ class SecurityConfig(
 
         http.csrf().disable()
             .authorizeRequests()
-                .anyRequest().permitAll()
-                // TODO 타 컨트롤러 토큰 검증 부 처리 후 주석 해제
-                //.antMatchers("/users/token/login", "/users/login", "/users/auth", "/users/auth/confirm").permitAll()
-                //.anyRequest().authenticated()
+                .antMatchers("/users/token/login", "/users/login", "/users/auth/**", "/users/signup").permitAll()
+                .anyRequest().authenticated()
                 .and()
             .addFilterBefore(
                  JwtAuthenticationFilter(jwtTokenProvider),

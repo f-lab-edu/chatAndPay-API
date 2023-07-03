@@ -1,5 +1,6 @@
 ### 1. PayUser 가입
 POST http://localhost:8080/pay-users/signup HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODM4ODg2MiwiZXhwIjoxNjg4MzkyNDYyfQ.OXHdLs2BrrAUWpg1gcXxMMubyy234AY8mjqPYY2zVy0
 Content-Type: application/json
 
 {
@@ -12,3 +13,4 @@ Content-Type: application/json
 
 ### 2. PayUser 탈퇴
 DELETE http://localhost:8080/pay-users/16 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODM4ODg2MiwiZXhwIjoxNjg4MzkyNDYyfQ.OXHdLs2BrrAUWpg1gcXxMMubyy234AY8mjqPYY2zVy0
