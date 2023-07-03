@@ -98,9 +98,17 @@ class UserController(
     }
 
     @PostMapping("/auth/confirm")
-    fun confirmAuthLoginUser(@RequestBody saveObj : AuthConfirmRequestDTO) : ResponseEntity<UserDTO>{
+    fun confirmAuthLoginUser(@RequestBody saveObj : AuthConfirmRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
 
         val confirmedUser = userService.authLoginConfirm(saveObj)
+
+        val tokens = confirmedUser?.id?.let { userService.tokenLoginUser(it) }
+
+        val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
+        val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
+
+        response.addCookie(accessTokenCookie)
+        response.addCookie(refreshTokenCookie)
 
         val responseBody = confirmedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
