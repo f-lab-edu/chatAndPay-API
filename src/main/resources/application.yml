@@ -19,6 +19,9 @@ spring:
       host: localhost
       port: 27017
       database: mydatabase
+  redis:
+    host: localhost
+    port: 6379
 sens:
   service-id: ${api-keys.sens.service-id}
   access-key: ${api-keys.sens.access-key}

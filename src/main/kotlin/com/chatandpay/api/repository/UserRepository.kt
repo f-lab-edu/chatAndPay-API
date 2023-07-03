@@ -61,6 +61,12 @@ class UserRepository {
         return entityManager.find(User::class.java, id)
     }
 
+    fun findByEmail(email: String) : User? {
+        val query = entityManager.createQuery("SELECT u FROM User u WHERE u.email = :email", User::class.java)
+        query.setParameter("email", email)
+        return query.resultList.firstOrNull()
+    }
+
     fun delete(user: User) : Boolean {
          return try {
              val managedUser = entityManager.merge(user)
