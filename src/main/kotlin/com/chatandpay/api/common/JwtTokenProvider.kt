@@ -117,7 +117,11 @@ class JwtTokenProvider (
     }
 
     fun resolveToken(req: HttpServletRequest): String? {
-        return req.getHeader("X-AUTH-TOKEN")
+        val authorizationHeader = req.getHeader("Authorization")
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7)
+        }
+        return null
     }
 
     fun validateToken(jwtToken: String?): Boolean {
