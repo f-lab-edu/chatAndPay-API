@@ -26,11 +26,17 @@ class JwtAuthenticationFilter(
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
 
         try {
-            val token = jwtTokenProvider.resolveToken((request as HttpServletRequest))
 
-            if (token != null && jwtTokenProvider.validateToken(token)) {
-                val authentication = jwtTokenProvider.getAuthentication(token)
-                SecurityContextHolder.getContext().authentication = authentication
+            val httpRequest = request as HttpServletRequest
+            val requestURI = httpRequest.requestURI
+
+            if (isAuthenticated(requestURI)) {
+                val token = jwtTokenProvider.resolveToken(httpRequest) ?: throw JwtException("토큰 포함 필요")
+
+                if (jwtTokenProvider.validateToken(token)) {
+                    val authentication = jwtTokenProvider.getAuthentication(token)
+                    SecurityContextHolder.getContext().authentication = authentication
+                }
             }
 
             chain.doFilter(request, response)
@@ -50,6 +56,17 @@ class JwtAuthenticationFilter(
         } catch (e: Exception) {
             logger.error("오류: $e")
         }
+    }
+
+    private fun isAuthenticated(requestURI: String): Boolean {
+        val excludedPatterns = arrayOf("/login", "/auth", "/signup")
+
+        for (pattern in excludedPatterns) {
+            if (requestURI.contains(pattern)) {
+                return false
+            }
+        }
+        return true
     }
 
 }
