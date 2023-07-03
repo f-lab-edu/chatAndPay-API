@@ -25,9 +25,8 @@ class UserController(
     fun loginUser(@RequestBody user: UserDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
 
         val loginUser = userService.login(user)
-        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
-
         val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
+        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
         val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
@@ -45,9 +44,8 @@ class UserController(
     fun tokenLoginUser(@RequestBody requestBody: AuthLoginUserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
 
         val loginUser = requestBody.email?.let { userService.emailLogin(it) }
-        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, email = it.email) }
-
         val tokens = requestBody.email?.let { userService.tokenLoginUser(it) }
+        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
 
         val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
         val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
@@ -110,7 +108,7 @@ class UserController(
         response.addCookie(accessTokenCookie)
         response.addCookie(refreshTokenCookie)
 
-        val responseBody = confirmedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = confirmedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         return ResponseEntity.ok(responseBody)
 
