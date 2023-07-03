@@ -13,4 +13,5 @@ data class UserDTO (
     var userId: String? = null,
     var password: String? = null,
     var verificationId: Long? = null,
+    var accessToken: String? = null
 ) : ApiResponse()
