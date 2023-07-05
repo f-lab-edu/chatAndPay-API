@@ -8,9 +8,9 @@ import com.chatandpay.api.common.SuccessResponse
 import com.chatandpay.api.dto.*
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.UserService
+import com.chatandpay.api.utils.CookieUtil
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 
 
@@ -28,11 +28,7 @@ class UserController(
         val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
         val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
-        val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
-        val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
-
-        response.addCookie(accessTokenCookie)
-        response.addCookie(refreshTokenCookie)
+        CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
         return ResponseEntity.ok(responseBody)
 
@@ -47,11 +43,7 @@ class UserController(
         val tokens = requestBody.email?.let { userService.tokenLoginUser(it) }
         val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
 
-        val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
-        val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
-
-        response.addCookie(accessTokenCookie)
-        response.addCookie(refreshTokenCookie)
+        CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
         return ResponseEntity.ok(responseBody)
 
@@ -66,9 +58,7 @@ class UserController(
 
         val tokens = jwtTokenProvider.validateRefreshToken(accessToken, refreshToken)
 
-        val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens.accessToken)
-
-        response.addCookie(accessTokenCookie)
+        CookieUtil.addTokenCookies(tokens.accessToken, null, response)
 
         return ResponseEntity.ok(tokens)
 
@@ -102,11 +92,7 @@ class UserController(
 
         val tokens = confirmedUser?.id?.let { userService.tokenLoginUser(it) }
 
-        val accessTokenCookie = Cookie(JwtTokenProvider.ACCESS_TOKEN_NAME, tokens?.accessToken)
-        val refreshTokenCookie = Cookie(JwtTokenProvider.REFRESH_TOKEN_NAME, tokens?.refreshToken)
-
-        response.addCookie(accessTokenCookie)
-        response.addCookie(refreshTokenCookie)
+        CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
         val responseBody = confirmedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
@@ -119,7 +105,6 @@ class UserController(
     fun confirmAuthJoinUser(@RequestBody saveObj : AuthConfirmRequestDTO) : ResponseEntity<AuthConfirmResponseDTO>{
 
         val smsAuthentication = userService.authConfirm(saveObj)
-
         val responseBody = smsAuthentication.id?.let { AuthConfirmResponseDTO(it) }
 
         return ResponseEntity.ok(responseBody)
