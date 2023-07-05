@@ -32,26 +32,27 @@ class JwtAuthenticationFilter(
 
             if (isAuthenticated(requestURI)) {
                 val token = jwtTokenProvider.resolveToken(httpRequest) ?: throw JwtException("토큰 포함 필요")
-
                 if (jwtTokenProvider.validateToken(token)) {
                     val authentication = jwtTokenProvider.getAuthentication(token)
                     SecurityContextHolder.getContext().authentication = authentication
                 }
+                throw JwtException("토큰 재발급 필요")
             }
 
             chain.doFilter(request, response)
         } catch (ex: JwtException) {
-            jwtExceptionHandler(response as HttpServletResponse, ErrorCode.BAD_REQUEST)
+            val message = ex.message ?: ""
+            jwtExceptionHandler(response as HttpServletResponse, ErrorCode.BAD_REQUEST, message)
         }
 
     }
 
-    private fun jwtExceptionHandler(response: HttpServletResponse, error: ErrorCode) {
+    private fun jwtExceptionHandler(response: HttpServletResponse, error: ErrorCode, message: String) {
         response.status = error.value
         response.contentType = "application/json"
         response.characterEncoding = "UTF-8"
         try {
-            val json = ObjectMapper().writeValueAsString(ErrorResponse(error.value, "유효한 토큰이 아닙니다."))
+            val json = ObjectMapper().writeValueAsString(ErrorResponse(error.value, message))
             response.writer.write(json)
         } catch (e: Exception) {
             logger.error("오류: $e")
@@ -59,7 +60,7 @@ class JwtAuthenticationFilter(
     }
 
     private fun isAuthenticated(requestURI: String): Boolean {
-        val excludedPatterns = arrayOf("/login", "/auth", "/signup")
+        val excludedPatterns = arrayOf("/login", "/auth", "/signup", "token")
 
         for (pattern in excludedPatterns) {
             if (requestURI.contains(pattern)) {
