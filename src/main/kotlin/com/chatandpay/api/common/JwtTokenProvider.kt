@@ -17,7 +17,6 @@ import org.springframework.stereotype.Component
 import java.util.*
 import java.util.Base64.*
 import javax.annotation.PostConstruct
-import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 
 
@@ -39,6 +38,12 @@ class JwtTokenProvider (
     fun validateRefreshToken(accessToken: String, refreshToken: String): ValidRefreshTokenResponse {
 
         val findInfo: List<Any> = redisService.getStringValue(refreshToken)
+
+        if(validateToken(accessToken)) {
+            invalidateToken(refreshToken)
+            throw RestApiException("accessToken 만료 전 요청 - refreshToken을 폐기합니다.")
+        }
+
         val userPk = getUserPk(accessToken)
 
         if (findInfo.size < 2) { throw RestApiException("유효한 토큰이 아닙니다.") }
@@ -46,8 +51,8 @@ class JwtTokenProvider (
         val firstElement = findInfo[0] as? String
         val firstElementLong = firstElement?.toLongOrNull() ?: throw RestApiException("유효한 토큰이 아닙니다.")
 
-        val isTokenValid = userPk == firstElement && validateToken(refreshToken)
-        if (!isTokenValid) { throw RestApiException("유효한 토큰이 아닙니다.") }
+        val isRefreshTokenValid = userPk == firstElement && validateToken(refreshToken)
+        if (!isRefreshTokenValid) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
         val userInfo = firstElementLong.toString()
 
@@ -108,13 +113,6 @@ class JwtTokenProvider (
         }
     }
 
-    fun getCookie(req: HttpServletRequest, cookieName: String?): Cookie? {
-        val cookies: Array<Cookie> = req.cookies
-        for (cookie in cookies) {
-            if (cookie.name.equals(cookieName)) return cookie
-        }
-        return null
-    }
 
     fun resolveToken(req: HttpServletRequest): String? {
         val authorizationHeader = req.getHeader("Authorization")
@@ -137,18 +135,13 @@ class JwtTokenProvider (
         }
     }
 
-    fun remainExpiration(token: String?): Long {
-        return try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body.expiration.time - Date().time
-        } catch (e: ExpiredJwtException) {
-            -1L
-        }
+    fun invalidateToken(refreshToken: String) {
+        redisService.deleteStringValue(refreshToken)
     }
 
     fun isLoggedOut(accessToken: String?): Boolean? {
         return if (accessToken == null) false else redisService.getRequestTokenList(accessToken).isNotEmpty()
     }
-
 
     companion object {
         const val TOKEN_VALIDATION_SECOND = 1000L * 60 * 30 * 2

@@ -60,7 +60,7 @@ class JwtAuthenticationFilter(
     }
 
     private fun isAuthenticated(requestURI: String): Boolean {
-        val excludedPatterns = arrayOf("/login", "/auth", "/signup", "token")
+        val excludedPatterns = arrayOf("/login", "/auth", "/signup", "/token")
 
         for (pattern in excludedPatterns) {
             if (requestURI.contains(pattern)) {
