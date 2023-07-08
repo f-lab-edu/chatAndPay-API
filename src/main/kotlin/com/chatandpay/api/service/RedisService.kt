@@ -18,6 +18,11 @@ class RedisService (
         redisTemplate.expire(key, expirationSeconds, TimeUnit.SECONDS)
     }
 
+    fun deleteStringValue(key: String) {
+        redisTemplate.delete(key)
+    }
+
+
     fun getStringValue(key: String): List<String> {
         return redisTemplate.opsForList().range(key, 0, -1) ?: emptyList()
     }

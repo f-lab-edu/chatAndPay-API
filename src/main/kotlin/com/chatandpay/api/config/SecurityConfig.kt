@@ -22,7 +22,7 @@ class SecurityConfig(
 
         http.csrf().disable()
             .authorizeRequests()
-                .antMatchers("/users/token/login", "/users/login", "/users/auth/**", "/users/signup").permitAll()
+                .antMatchers("/users/token/**", "/users/login", "/users/auth/**", "/users/signup").permitAll()
                 .anyRequest().authenticated()
                 .and()
             .addFilterBefore(
