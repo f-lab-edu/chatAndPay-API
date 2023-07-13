@@ -16,17 +16,17 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-class TransferService (
+class TransferService(
     private val payUserRepository: PayUserRepository,
-    private val walletRepository : WalletRepository,
+    private val walletRepository: WalletRepository,
     private val transferRepository: TransferRepository,
     private val accountRepository: AccountRepository,
-    private val payUserService : PayUserService,
+    private val payUserService: PayUserService,
     private val logService: LogService
 ){
 
     @Transactional
-    fun sendTransfer(dto: ReceiveTransferRequestDTO) : ReceiveTransferResponseDTO? {
+    fun sendTransfer(dto: ReceiveTransferRequestDTO, uuid: UUID) : ReceiveTransferResponseDTO? {
 
         val findSendUser = payUserRepository.findById(dto.senderId) ?: throw EntityNotFoundException("송신자를 찾을 수 없습니다.")
         val findReceiveUser = payUserRepository.findById(dto.receiverId) ?: throw EntityNotFoundException("수신자를 찾을 수 없습니다.")
@@ -40,7 +40,7 @@ class TransferService (
         findSenderWallet.money = findSenderWallet.money - dto.amount
         walletRepository.save(findSenderWallet)
 
-        val transferDto = Transfer(UUID.randomUUID(), findSendUser, findReceiveUser, dto.amount, false)
+        val transferDto = Transfer(uuid, findSendUser, findReceiveUser, dto.amount, false)
         val savedTransfer = transferRepository.save(transferDto)
 
         return savedTransfer?.let {
