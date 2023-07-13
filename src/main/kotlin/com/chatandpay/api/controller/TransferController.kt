@@ -1,5 +1,6 @@
 package com.chatandpay.api.controller
 
+import com.chatandpay.api.component.RedissonLockFacade
 import com.chatandpay.api.dto.*
 import com.chatandpay.api.service.TransferService
 import org.springframework.http.ResponseEntity
@@ -8,13 +9,16 @@ import java.util.*
 
 @RestController
 @RequestMapping("/transfers")
-class TransferController (val transferService : TransferService) {
+class TransferController (
+    val transferService : TransferService,
+    val redissonLockFacade: RedissonLockFacade
+) {
 
 
     @PostMapping("")
     fun sendTransfer(@RequestBody request: ReceiveTransferRequestDTO): ResponseEntity<ReceiveTransferResponseDTO> {
 
-        val response = transferService.sendTransfer(request)
+        val response = redissonLockFacade.sendTransfer(request)
         return ResponseEntity.ok(response)
 
     }
