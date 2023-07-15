@@ -32,11 +32,11 @@ class JwtAuthenticationFilter(
 
             if (isAuthenticated(requestURI)) {
                 val token = jwtTokenProvider.resolveToken(httpRequest) ?: throw JwtException("토큰 포함 필요")
-                if (jwtTokenProvider.validateToken(token)) {
-                    val authentication = jwtTokenProvider.getAuthentication(token)
-                    SecurityContextHolder.getContext().authentication = authentication
+                if (!jwtTokenProvider.validateToken(token)) {
+                    throw JwtException("토큰 재발급 필요")
                 }
-                throw JwtException("토큰 재발급 필요")
+                val authentication = jwtTokenProvider.getAuthentication(token)
+                SecurityContextHolder.getContext().authentication = authentication
             }
 
             chain.doFilter(request, response)
