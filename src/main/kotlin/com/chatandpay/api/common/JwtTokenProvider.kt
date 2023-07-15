@@ -2,7 +2,6 @@ package com.chatandpay.api.common
 
 import com.chatandpay.api.dto.ValidRefreshTokenResponse
 import com.chatandpay.api.exception.RestApiException
-import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.service.RedisService
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletRequest
 @Component
 class JwtTokenProvider (
     private val userDetailsService: UserDetailsService,
-    private val userRepository: UserRepository,
     private val redisService: RedisService
 ){
 
@@ -39,20 +37,23 @@ class JwtTokenProvider (
 
         val findInfo: List<Any> = redisService.getStringValue(refreshToken)
 
+        if(isInvalidated(refreshToken)) {
+            throw RestApiException("유효한 토큰이 아닙니다.")
+        }
+
         if(validateToken(accessToken)) {
             invalidateToken(refreshToken)
             throw RestApiException("accessToken 만료 전 요청 - refreshToken을 폐기합니다.")
         }
 
-        val userPk = getUserPk(accessToken)
+        val userPk = getUserPk(refreshToken)
 
         if (findInfo.size < 2) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
         val firstElement = findInfo[0] as? String
         val firstElementLong = firstElement?.toLongOrNull() ?: throw RestApiException("유효한 토큰이 아닙니다.")
 
-        val isRefreshTokenValid = userPk == firstElement && validateToken(refreshToken)
-        if (!isRefreshTokenValid) { throw RestApiException("유효한 토큰이 아닙니다.") }
+        if (userPk != firstElement) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
         val userInfo = firstElementLong.toString()
 
@@ -137,6 +138,10 @@ class JwtTokenProvider (
 
     fun invalidateToken(refreshToken: String) {
         redisService.deleteStringValue(refreshToken)
+    }
+
+    fun isInvalidated(refreshToken: String) : Boolean {
+        return redisService.getRequestTokenList(refreshToken).isEmpty()
     }
 
     fun isLoggedOut(accessToken: String?): Boolean? {
