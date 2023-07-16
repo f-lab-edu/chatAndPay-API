@@ -20,7 +20,7 @@ class SecurityConfig(
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
 
-        http.csrf().disable()
+        return http.csrf().disable()
             .authorizeRequests()
                 .antMatchers("/users/token/**", "/users/login", "/users/auth/**", "/users/signup").permitAll()
                 .anyRequest().authenticated()
@@ -30,11 +30,10 @@ class SecurityConfig(
                 UsernamePasswordAuthenticationFilter::class.java
             )
             .formLogin().disable()
-
-        http.headers()
+            .headers()
                 .frameOptions().sameOrigin()
-
-        return http.build()
+            .and()
+            .build()
     }
 
     @Bean

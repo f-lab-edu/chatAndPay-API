@@ -148,4 +148,25 @@ class UserController(
 
     }
 
+    @PostMapping("/logout")
+    fun logout(
+        response: HttpServletResponse,
+        @RequestHeader("Authorization") authorization: String
+    ) : ResponseEntity<ApiResponse>{
+
+        val logoutYn = userService.logoutUser(authorization)
+
+        return if (logoutYn) {
+            val successResponse = SuccessResponse("로그아웃 완료")
+            ResponseEntity.ok(successResponse)
+        } else {
+            val errorCode = ErrorCode.BAD_REQUEST
+            val errorResponse = ErrorResponse(errorCode.value, "로그아웃 실패")
+            ResponseEntity.badRequest().body(errorResponse)
+        }
+
+
+    }
+
+
 }

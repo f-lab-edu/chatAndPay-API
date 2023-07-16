@@ -219,5 +219,18 @@ class UserService(
 
     }
 
+    fun logoutUser(authorization: String) : Boolean{
+
+        val accessToken = authorization.substring(7)
+
+        return try {
+            jwtTokenProvider.invalidateToken(accessToken)
+            true
+        } catch (e : Exception) {
+            false
+        }
+
+    }
+
 
 }
