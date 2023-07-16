@@ -44,7 +44,7 @@ class JwtTokenProvider (
         }
 
         if(validateToken(accessToken)) {
-            invalidateToken(refreshToken)
+            invalidateToken(refreshToken, "refresh")
             throw RestApiException("accessToken 만료 전 요청 - refreshToken을 폐기합니다.")
         }
 
@@ -141,8 +141,21 @@ class JwtTokenProvider (
         }
     }
 
-    fun invalidateToken(refreshToken: String) {
-        redisService.deleteStringValue(refreshToken)
+    fun invalidateToken(token: String, tokenType: String) {
+
+        if(tokenType == "refresh") {
+            redisService.deleteStringValue(token)
+        }
+
+        val data = ArrayList<String>()
+        data.add(LocalDateTime.now().toString())
+        val tokenExpirationTime = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body.expiration.time
+
+        val currentTime = System.currentTimeMillis()
+        val ttlExpirationTime = (tokenExpirationTime - currentTime) / 1000
+
+        redisService.setStringValue(token, data, ttlExpirationTime)
+
     }
 
     fun isInvalidated(refreshToken: String) : Boolean {

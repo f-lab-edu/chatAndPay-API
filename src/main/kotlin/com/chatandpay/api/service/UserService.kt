@@ -224,7 +224,7 @@ class UserService(
         val accessToken = authorization.substring(7)
 
         return try {
-            jwtTokenProvider.invalidateToken(accessToken)
+            jwtTokenProvider.invalidateToken(accessToken, "access")
             true
         } catch (e : Exception) {
             false
