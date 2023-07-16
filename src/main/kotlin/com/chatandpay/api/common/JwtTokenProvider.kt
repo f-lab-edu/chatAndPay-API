@@ -34,7 +34,7 @@ class JwtTokenProvider (
         secretKey = getEncoder().encodeToString(secretKey!!.toByteArray())
     }
 
-    fun validateRefreshToken(accessToken: String, refreshToken: String): ValidRefreshTokenResponse {
+    fun regenerateToken(accessToken: String, refreshToken: String): ValidRefreshTokenResponse {
 
         val findInfo: List<Any> = redisService.getStringValue(refreshToken)
 
