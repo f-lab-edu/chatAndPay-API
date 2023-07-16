@@ -8,6 +8,7 @@ import com.chatandpay.api.dto.PayUserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.*
 import org.springframework.stereotype.Service
+import java.util.*
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
@@ -40,7 +41,7 @@ class PayUserService(
 
         val savedUser = payUserRepository.save(regUser) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
         val wallet = Wallet(money = 0, payUser = savedUser)
-        savedUser.wallet = walletRepository.save(wallet) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
+        savedUser.wallet = walletRepository.save(wallet, UUID.randomUUID()) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
 
         return savedUser.id?.let { PayUserDTO(user.name, user.cellphone, it, savedUser.userSeqNo, savedUser.birthDate) }
 

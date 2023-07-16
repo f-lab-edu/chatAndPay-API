@@ -18,7 +18,8 @@ class TransferController (
     @PostMapping("")
     fun sendTransfer(@RequestBody request: ReceiveTransferRequestDTO): ResponseEntity<ReceiveTransferResponseDTO> {
 
-        val response = redissonLockFacade.sendTransfer(request)
+        val uuid = UUID.randomUUID()
+        val response = transferService.sendTransfer(request, uuid)
         return ResponseEntity.ok(response)
 
     }

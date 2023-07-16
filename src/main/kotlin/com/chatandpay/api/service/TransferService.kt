@@ -10,6 +10,8 @@ import com.chatandpay.api.repository.AccountRepository
 import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.repository.TransferRepository
 import com.chatandpay.api.repository.WalletRepository
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.persistence.EntityNotFoundException
@@ -25,23 +27,41 @@ class TransferService(
     private val logService: LogService
 ){
 
+    private val logger: Logger = LoggerFactory.getLogger(WalletRepository::class.java)
+
+
     @Transactional
     fun sendTransfer(dto: ReceiveTransferRequestDTO, uuid: UUID) : ReceiveTransferResponseDTO? {
+
 
         val findSendUser = payUserRepository.findById(dto.senderId) ?: throw EntityNotFoundException("송신자를 찾을 수 없습니다.")
         val findReceiveUser = payUserRepository.findById(dto.receiverId) ?: throw EntityNotFoundException("수신자를 찾을 수 없습니다.")
         val findSenderWallet = findSendUser.wallet ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
         val findSenderWalletAmount = findSenderWallet.money
+        val findSenderWalletVersion = findSenderWallet.version ?: 0
 
         if (findSenderWalletAmount < dto.amount) {
             throw IllegalArgumentException("출금 잔액이 부족합니다.")
         }
 
         findSenderWallet.money = findSenderWallet.money - dto.amount
-        walletRepository.save(findSenderWallet)
+        val updateWallet = walletRepository.save(findSenderWallet, uuid)
+
+        logger.info("findSenderWalletVersion!!!! $findSenderWalletVersion, $uuid")
+        logger.info("updateWallet?.version!!!! ${updateWallet?.version}, $uuid")
+
+        if(findSenderWalletVersion.plus(1) != updateWallet?.version){
+
+            logger.info("IllegalStateException findSenderWalletVersion!!!! $findSenderWalletVersion, $uuid")
+            logger.info("IllegalStateException updateWallet?.version!!!! ${updateWallet?.version}, $uuid")
+
+            throw IllegalStateException("지갑 업데이트 중 버전이 변경되지 않았습니다.")
+        }
 
         val transferDto = Transfer(uuid, findSendUser, findReceiveUser, dto.amount, false)
         val savedTransfer = transferRepository.save(transferDto)
+
+        logger.info("save? $uuid")
 
         return savedTransfer?.let {
             ReceiveTransferResponseDTO(
@@ -131,9 +151,12 @@ class TransferService(
     @Transactional
     fun finalizeOtherBankTransfer(transferDto: OtherBankTransfer, findSenderWallet: Wallet) : OtherBankTransfer? {
         // TODO 통신부 => 외부 통신 후 실제 송금 완료 처리 부분
+
+
+        val uuid = UUID.randomUUID()
         transferDto.transferred = true
         findSenderWallet.money = findSenderWallet.money - transferDto.amount
-        walletRepository.save(findSenderWallet)
+        walletRepository.save(findSenderWallet, uuid)
         return transferRepository.save(transferDto)
     }
 
@@ -185,6 +208,10 @@ class TransferService(
 
     @Transactional
     fun changePendingTransferStateCancel(transfer: Transfer): Transfer {
+
+
+        val uuid = UUID.randomUUID()
+
         val transferDto = Transfer(UUID.randomUUID(), transfer.sender, transfer.sender, transfer.amount, true)
         val afterTransfer = transferRepository.save(transferDto) ?: throw RestApiException("송금 취소 실패")
 
@@ -193,7 +220,7 @@ class TransferService(
         val afterAmount = beforeAmount.plus(transfer.amount)
 
         senderWallet.money = afterAmount
-        walletRepository.save(senderWallet)
+        walletRepository.save(senderWallet, uuid)
         if(transfer.amount != afterAmount.minus(beforeAmount)) throw RestApiException("송금 취소 실패")
 
         return afterTransfer

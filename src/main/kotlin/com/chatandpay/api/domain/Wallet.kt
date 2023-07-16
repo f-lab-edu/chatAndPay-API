@@ -18,7 +18,8 @@ data class Wallet(
     @OneToOne
     @JoinColumn(name = "pay_user_id")
     @JsonIgnore
-    val payUser: PayUser
+    val payUser: PayUser,
+    var version: Long? = 0,
 ) {
     override fun toString(): String {
         return "Wallet(id=$id, money=$money)"
