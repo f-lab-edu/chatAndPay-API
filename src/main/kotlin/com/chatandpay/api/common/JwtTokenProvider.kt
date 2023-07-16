@@ -2,6 +2,7 @@ package com.chatandpay.api.common
 
 import com.chatandpay.api.dto.ValidRefreshTokenResponse
 import com.chatandpay.api.exception.RestApiException
+import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.service.RedisService
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
@@ -13,6 +14,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.util.*
 import java.util.Base64.*
 import javax.annotation.PostConstruct
@@ -124,6 +126,9 @@ class JwtTokenProvider (
     }
 
     fun validateToken(jwtToken: String?): Boolean {
+
+        if(isLoggedOut(jwtToken) == true) return false
+
         return try {
             val claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken)
             return !claims.body.expiration.before(Date())
@@ -145,7 +150,7 @@ class JwtTokenProvider (
     }
 
     fun isLoggedOut(accessToken: String?): Boolean? {
-        return if (accessToken == null) false else redisService.getRequestTokenList(accessToken).isNotEmpty()
+        return if (accessToken == null) false else redisService.getStringValue(accessToken).isNotEmpty()
     }
 
     companion object {
