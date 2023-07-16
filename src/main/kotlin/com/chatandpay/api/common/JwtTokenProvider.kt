@@ -48,7 +48,7 @@ class JwtTokenProvider (
             throw RestApiException("accessToken 만료 전 요청 - refreshToken을 폐기합니다.")
         }
 
-        val userPk = getUserPk(refreshToken)
+        val userPk = redisService.getStringValue(refreshToken)[0]
 
         if (findInfo.size < 2) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
@@ -88,6 +88,8 @@ class JwtTokenProvider (
     }
 
     fun createRefreshToken(): String {
+
+
 
         val now = Date()
         return Jwts.builder()
@@ -159,7 +161,7 @@ class JwtTokenProvider (
     }
 
     fun isInvalidated(refreshToken: String) : Boolean {
-        return redisService.getRequestTokenList(refreshToken).isEmpty()
+        return redisService.getStringValue(refreshToken).isEmpty()
     }
 
     fun isLoggedOut(accessToken: String?): Boolean? {

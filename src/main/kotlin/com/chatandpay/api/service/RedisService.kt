@@ -28,10 +28,4 @@ class RedisService (
     }
 
 
-    fun getRequestTokenList(refreshToken: String): List<String> {
-        val tokenList = redisTemplate.opsForList().range(refreshToken, 0, -1)
-        return tokenList ?: emptyList()
-    }
-
-
 }
