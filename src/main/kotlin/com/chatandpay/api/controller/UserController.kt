@@ -58,7 +58,7 @@ class UserController(
 
         val tokens = jwtTokenProvider.validateRefreshToken(accessToken, refreshToken)
 
-        CookieUtil.addTokenCookies(tokens.accessToken, null, response)
+        CookieUtil.addTokenCookies(tokens.accessToken, tokens.refreshToken, response)
 
         return ResponseEntity.ok(tokens)
 
