@@ -69,6 +69,7 @@ Content-Type: application/json
 
 ### 5.1 회원 정보 수정 : id / password 등록하지 않음
 PATCH http://localhost:8080/users/16 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4OTQyNjQwNCwiZXhwIjoxNjg5NDMwMDA0fQ.UKkj8v-uuomKFozZAHCXkiAanyhbnT23xFzdM9mKAns
 Content-Type: application/json
 
 {
@@ -80,6 +81,7 @@ Content-Type: application/json
 
 ### 5.2 회원 정보 수정 : id / password 등록
 PATCH http://localhost:8080/users/2 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODgyMzA4NCwiZXhwIjoxODE2ODg4MjMwODR9.qKRueDs5BPlmJ-c6xESsEXYzCD7ZC2x385qUynj7_6g
 Content-Type: application/json
 
 {
@@ -92,6 +94,7 @@ Content-Type: application/json
 
 ### 5.3 회원 정보 수정 : 기 id 등록자 password 수정
 PATCH http://localhost:8080/users/16 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4OTQ0MTY1OCwiZXhwIjoxNjg5NDQ1MjU4fQ.vEk5Iizgu95vlufPRC2onbdV9wtvgz1bQ7P3pZ-wyIQ
 Content-Type: application/json
 
 {
@@ -103,4 +106,8 @@ Content-Type: application/json
 
 ### 6. 회원 탈퇴
 DELETE http://localhost:8080/users/12 HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4OTQ0MTY1OCwiZXhwIjoxNjg5NDQ1MjU4fQ.vEk5Iizgu95vlufPRC2onbdV9wtvgz1bQ7P3pZ-wyIQ
 
+### 7. 회원 로그아웃
+POST http://localhost:8080/users/logout HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIzIiwicm9sZXMiOiJVU0VSIiwiaWF0IjoxNjg5NDQ1NDc5LCJleHAiOjE2ODk0NDkwNzl9.PpdcAfqXE4NgVPE3ejL1Ox6V8gA4DJpiYCEDZBJ1o9M
