@@ -66,6 +66,8 @@ class JwtTokenProvider (
         val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it) }
         val newRefreshToken = createRefreshToken()
 
+        invalidateToken(refreshToken, "refresh")
+
         return ValidRefreshTokenResponse(userInfo, newAccessToken, newRefreshToken)
 
     }
