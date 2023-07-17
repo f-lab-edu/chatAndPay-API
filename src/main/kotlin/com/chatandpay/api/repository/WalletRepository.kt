@@ -35,9 +35,10 @@ class WalletRepository {
                     continue
                 }
 
-                val updateQuery = entityManager.createQuery("UPDATE Wallet w SET w.money = :money, w.version = :version WHERE w.id = :id")
+                val updateQuery = entityManager.createQuery("UPDATE Wallet w SET w.money = :money, w.version = :version WHERE w.id = :id and w.version = :previous_version")
                 updateQuery.setParameter("money", wallet.money)
-                updateQuery.setParameter("version", wallet.version?.plus(1))
+                updateQuery.setParameter("version", wallet.version)
+                updateQuery.setParameter("previous_version", wallet.version)
                 updateQuery.setParameter("id", wallet.id)
 
                 updatedCount = updateQuery.executeUpdate()

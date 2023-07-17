@@ -19,6 +19,7 @@ data class Wallet(
     @JoinColumn(name = "pay_user_id")
     @JsonIgnore
     val payUser: PayUser,
+    @Version
     var version: Long? = 0,
 ) {
     override fun toString(): String {
