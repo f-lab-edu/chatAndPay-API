@@ -3,6 +3,7 @@ GET http://localhost:8080/openapi/token HTTP/1.1
 
 ### 2. OpenAPI 계좌 실명 조회 
 POST http://localhost:8080/openapi/real_name HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODM4ODg2MiwiZXhwIjoxNjg4MzkyNDYyfQ.OXHdLs2BrrAUWpg1gcXxMMubyy234AY8mjqPYY2zVy0
 Content-Type: application/json
 
 {

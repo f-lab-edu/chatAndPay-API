@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 data class UserDTO (
     var name: String,
     var cellphone: String,
-    var userId: String?,
-    var password: String?
+    var email: String? = null,
+    var userId: String? = null,
+    var password: String? = null,
+    var verificationId: Long? = null,
+    var accessToken: String? = null
 ) : ApiResponse()

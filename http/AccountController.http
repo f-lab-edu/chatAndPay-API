@@ -1,7 +1,7 @@
 ### 1. 타행 계좌 등록
 POST http://localhost:8080/accounts HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODM4ODg2MiwiZXhwIjoxNjg4MzkyNDYyfQ.OXHdLs2BrrAUWpg1gcXxMMubyy234AY8mjqPYY2zVy0
 Content-Type: application/json
-
 {
   "bank_code": "090",
   "account_number": "3333037898989",
@@ -12,6 +12,7 @@ Content-Type: application/json
 
 ### 2. 타행 계좌에서 지갑 충전
 POST http://localhost:8080/accounts/deposit HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsImlhdCI6MTY4ODM4ODg2MiwiZXhwIjoxNjg4MzkyNDYyfQ.OXHdLs2BrrAUWpg1gcXxMMubyy234AY8mjqPYY2zVy0
 Content-Type: application/json
 
 {

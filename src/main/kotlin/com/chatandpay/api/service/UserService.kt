@@ -1,8 +1,12 @@
 package com.chatandpay.api.service
 
+import com.chatandpay.api.common.JwtTokenProvider
+import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
 import com.chatandpay.api.dto.AuthConfirmRequestDTO
+import com.chatandpay.api.dto.TokenInfo
+import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
@@ -13,7 +17,13 @@ import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
 
 @Service
-class UserService(private val userRepository: UserRepository, private val authRepository: AuthRepository, private val payUserService: PayUserService) {
+class UserService(
+    private val userRepository: UserRepository,
+    private val authRepository: AuthRepository,
+    private val payUserService: PayUserService,
+    private val jwtTokenProvider: JwtTokenProvider,
+    private val redisService: RedisService
+) {
 
     @Autowired
     lateinit var passwordEncoder: PasswordEncoder
@@ -23,7 +33,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
 
     @Transactional
-    fun register(user : User): User? {
+    fun register(user : UserDTO): User? {
 
         if (user.name.isEmpty() || user.cellphone.isEmpty()) {
             throw IllegalArgumentException("이름, 휴대전화번호를 모두 입력하세요.")
@@ -33,7 +43,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
 
-        val authData = authRepository.findById(user.verificationId) ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
+        val authData = user.verificationId?.let { authRepository.findById(it) } ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
 
         if (authData.phoneNumber != user.cellphone) {
             throw IllegalArgumentException("인증을 요청한 휴대폰 번호와 가입 요청 휴대폰 번호가 다릅니다.")
@@ -43,12 +53,52 @@ class UserService(private val userRepository: UserRepository, private val authRe
             throw IllegalArgumentException("휴대폰 인증이 진행되지 않았습니다.")
         }
 
-        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId)
+        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId!!, role = UserRole.USER)
         return userRepository.save(regUser)
     }
 
+    fun tokenLoginUser(email: String) : TokenInfo {
 
-    fun login(user : User): User? {
+        val findUser = userRepository.findByEmail(email)
+            ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
+
+        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role)
+        val refreshToken: String = jwtTokenProvider.createRefreshToken()
+
+        saveTokenToRedis(findUser, accessToken, refreshToken)
+
+        return TokenInfo(accessToken, refreshToken)
+    }
+
+
+    fun tokenLoginUser(id: Long) : TokenInfo {
+
+        val findUser = userRepository.findById(id)
+            ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
+
+        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role)
+        val refreshToken: String = jwtTokenProvider.createRefreshToken()
+
+        saveTokenToRedis(findUser, accessToken, refreshToken)
+
+        return TokenInfo(accessToken, refreshToken)
+    }
+
+    fun saveTokenToRedis(findUser: User, accessToken: String, refreshToken: String) {
+
+        val data = ArrayList<String>()
+        data.add(findUser.id.toString())
+        data.add(accessToken)
+
+        redisService.setStringValue(
+            refreshToken,
+            data,
+            JwtTokenProvider.REFRESH_TOKEN_VALIDATION_SECOND
+        )
+
+    }
+
+    fun login(user : UserDTO): User? {
 
         val findUser = user.userId?.let { userRepository.findByUserId(it) }
                         ?: throw EntityNotFoundException("해당 아이디로 가입된 사용자가 없습니다.")
@@ -61,7 +111,14 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
     }
 
-    fun authJoin(user: User): Long? {
+    fun emailLogin(email: String): User? {
+
+        return userRepository.findByEmail(email)
+            ?: throw EntityNotFoundException("해당 이메일로 가입된 사용자가 없습니다.")
+
+    }
+
+    fun authJoin(user: UserDTO): Long? {
 
         if (userRepository.findByCellphone(user.cellphone) != null)  {
             throw IllegalArgumentException("해당 휴대전화번호로 가입된 사용자가 있습니다.")
@@ -109,7 +166,7 @@ class UserService(private val userRepository: UserRepository, private val authRe
 
 
     @Transactional
-    fun updateUser(id: Long, userRequest: User) : User? {
+    fun updateUser(id: Long, userRequest: UserDTO) : User? {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
@@ -158,6 +215,19 @@ class UserService(private val userRepository: UserRepository, private val authRe
             return userRepository.delete(findUser)
         } catch (e : Exception) {
             throw RestApiException(e.message)
+        }
+
+    }
+
+    fun logoutUser(authorization: String) : Boolean{
+
+        val accessToken = authorization.substring(7)
+
+        return try {
+            jwtTokenProvider.invalidateToken(accessToken, "access")
+            true
+        } catch (e : Exception) {
+            false
         }
 
     }

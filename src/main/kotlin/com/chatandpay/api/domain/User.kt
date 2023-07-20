@@ -1,5 +1,6 @@
 package com.chatandpay.api.domain
 
+import com.chatandpay.api.common.UserRole
 import lombok.AllArgsConstructor
 import lombok.NoArgsConstructor
 import javax.persistence.*
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
-data class User  (
+data class User (
 
     @Id
     @Column(nullable = false)
@@ -22,11 +23,15 @@ data class User  (
     @Column(nullable = true)
     var userId: String? = null,
     @Column(nullable = true)
+    var email: String? = null,
+    @Column(nullable = true)
     var password: String? = null,
     @Column(nullable = false)
     var name: String,
     @Column(nullable = false)
     var verificationId: Long,
+    @Enumerated(EnumType.STRING)
+    var role: UserRole
 
 ): BaseEntity()
 
