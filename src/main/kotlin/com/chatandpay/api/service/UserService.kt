@@ -4,7 +4,6 @@ import com.chatandpay.api.common.JwtTokenProvider
 import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
-import com.chatandpay.api.dto.AuthConfirmRequestDTO
 import com.chatandpay.api.dto.TokenInfo
 import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
@@ -33,7 +32,7 @@ class UserService(
 
 
     @Transactional
-    fun register(user : UserDTO): User? {
+    fun register(user : UserDTO.UserRequestDTO): User? {
 
         if (user.name.isEmpty() || user.cellphone.isEmpty()) {
             throw IllegalArgumentException("이름, 휴대전화번호를 모두 입력하세요.")
@@ -98,7 +97,7 @@ class UserService(
 
     }
 
-    fun login(user : UserDTO): User? {
+    fun login(user : UserDTO.UserRequestDTO): User? {
 
         val findUser = user.userId?.let { userRepository.findByUserId(it) }
                         ?: throw EntityNotFoundException("해당 아이디로 가입된 사용자가 없습니다.")
@@ -118,7 +117,7 @@ class UserService(
 
     }
 
-    fun authJoin(user: UserDTO): Long? {
+    fun authJoin(user: UserDTO.UserRequestDTO): Long? {
 
         if (userRepository.findByCellphone(user.cellphone) != null)  {
             throw IllegalArgumentException("해당 휴대전화번호로 가입된 사용자가 있습니다.")
@@ -137,7 +136,7 @@ class UserService(
         return findUser
     }
 
-    fun authLoginConfirm(saveObj : AuthConfirmRequestDTO): User? {
+    fun authLoginConfirm(saveObj : UserDTO.AuthConfirmRequestDTO): User? {
 
         val authConfirm: SmsAuthentication = authConfirm(saveObj)
 
@@ -146,7 +145,7 @@ class UserService(
     }
 
 
-    fun authConfirm(saveObj : AuthConfirmRequestDTO): SmsAuthentication {
+    fun authConfirm(saveObj : UserDTO.AuthConfirmRequestDTO): SmsAuthentication {
 
         val findAuth = authRepository.findByCellphone(saveObj.cellphone)
             ?: throw EntityNotFoundException("해당 휴대전화번호로 요청된 인증이 없습니다.")
@@ -166,7 +165,7 @@ class UserService(
 
 
     @Transactional
-    fun updateUser(id: Long, userRequest: UserDTO) : User? {
+    fun updateUser(id: Long, userRequest: UserDTO.UserRequestDTO) : User? {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
