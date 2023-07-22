@@ -42,7 +42,7 @@ class UserService(
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
 
-        val authData = user.verificationId?.let { authRepository.findById(it) } ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
+        val authData = user.verificationId.let { authRepository.findById(it) } ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
 
         if (authData.phoneNumber != user.cellphone) {
             throw IllegalArgumentException("인증을 요청한 휴대폰 번호와 가입 요청 휴대폰 번호가 다릅니다.")
@@ -52,7 +52,7 @@ class UserService(
             throw IllegalArgumentException("휴대폰 인증이 진행되지 않았습니다.")
         }
 
-        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId!!, role = UserRole.USER)
+        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId, role = UserRole.USER)
         return userRepository.save(regUser)
     }
 
