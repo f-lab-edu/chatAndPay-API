@@ -34,10 +34,6 @@ class UserService(
     @Transactional
     fun register(user : UserDTO.UserRequestDTO): User? {
 
-        if (user.name.isEmpty() || user.cellphone.isEmpty()) {
-            throw IllegalArgumentException("이름, 휴대전화번호를 모두 입력하세요.")
-        }
-
         if(userRepository.findByCellphone(user.cellphone) != null) {
             throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
         }
@@ -97,9 +93,9 @@ class UserService(
 
     }
 
-    fun login(user : UserDTO.UserRequestDTO): User? {
+    fun login(user : UserDTO.UserLoginRequestDTO): User? {
 
-        val findUser = user.userId?.let { userRepository.findByUserId(it) }
+        val findUser = user.userId.let { userRepository.findByUserId(it) }
                         ?: throw EntityNotFoundException("해당 아이디로 가입된 사용자가 없습니다.")
 
         if(!passwordEncoder.matches(user.password, findUser.password)) {
@@ -117,7 +113,7 @@ class UserService(
 
     }
 
-    fun authJoin(user: UserDTO.UserRequestDTO): Long? {
+    fun authJoin(user: UserDTO.UserSMSRequestDTO): Long? {
 
         if (userRepository.findByCellphone(user.cellphone) != null)  {
             throw IllegalArgumentException("해당 휴대전화번호로 가입된 사용자가 있습니다.")
