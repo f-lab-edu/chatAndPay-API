@@ -74,8 +74,8 @@ internal class ExceptionHandlerController {
     }
 
     private fun methodArgumentNotValidErrorParser(ex: MethodArgumentNotValidException) : String {
-        val errors = ex.bindingResult.allErrors.mapNotNull{ it.defaultMessage }
-        return errors[errors.size-1]
+        val errors = ex.bindingResult.fieldErrors.mapNotNull{ "${it.field}: ${it.defaultMessage}"}
+        return errors.joinToString(", ")
     }
 
 }
