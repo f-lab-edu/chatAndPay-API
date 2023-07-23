@@ -1,9 +1,7 @@
 package com.chatandpay.api.controller
 
 import com.chatandpay.api.component.AccountCheck
-import com.chatandpay.api.dto.OtherBankAccountRequestDTO
-import com.chatandpay.api.dto.DepositWalletRequestDTO
-import com.chatandpay.api.dto.OtherBankAccountResponseDTO
+import com.chatandpay.api.dto.AccountDTO
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -18,7 +16,7 @@ class AccountController(
 ) {
 
     @PostMapping("")
-    fun addExternalAccount(@RequestBody account: OtherBankAccountRequestDTO): ResponseEntity<OtherBankAccountResponseDTO> {
+    fun addExternalAccount(@RequestBody account: AccountDTO.OtherBankAccountRequestDTO): ResponseEntity<AccountDTO.OtherBankAccountResponseDTO> {
 
         val response = accountCheck.saveAccount(account)
         return ResponseEntity.ok(response)
@@ -27,7 +25,7 @@ class AccountController(
 
 
     @PostMapping("/deposit")
-    fun chargeWalletfromAccount(@RequestBody depositMoney: DepositWalletRequestDTO): ResponseEntity<Any> {
+    fun chargeWalletFromAccount(@RequestBody depositMoney: AccountDTO.DepositWalletRequestDTO): ResponseEntity<AccountDTO.DepositWalletResponseDTO> {
 
         val response = accountCheck.chargeWallet(depositMoney)
         return ResponseEntity.ok(response)
