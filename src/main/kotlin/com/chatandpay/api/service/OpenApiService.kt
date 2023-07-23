@@ -123,7 +123,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
 
-        val testDTO = WithdrawMoneyResponseDTO(
+        val testDTO = OpenApiDTO.WithdrawMoneyResponseDTO(
             apiTranId = "2ffd133a-d17a-431d-a6a5",
             apiTranDtm = "20230910101921567",
             rspCode = "A0000",
