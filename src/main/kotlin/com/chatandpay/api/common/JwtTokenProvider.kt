@@ -1,6 +1,6 @@
 package com.chatandpay.api.common
 
-import com.chatandpay.api.dto.ValidRefreshTokenResponse
+import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.RedisService
 import io.jsonwebtoken.ExpiredJwtException
@@ -34,7 +34,7 @@ class JwtTokenProvider (
         secretKey = getEncoder().encodeToString(secretKey!!.toByteArray())
     }
 
-    fun regenerateToken(accessToken: String, refreshToken: String): ValidRefreshTokenResponse {
+    fun regenerateToken(accessToken: String, refreshToken: String): UserDTO.ValidRefreshTokenResponse {
 
         val findInfo: List<Any> = redisService.getStringValue(refreshToken)
 
@@ -68,7 +68,7 @@ class JwtTokenProvider (
 
         invalidateToken(refreshToken, "refresh")
 
-        return ValidRefreshTokenResponse(userInfo, newAccessToken, newRefreshToken)
+        return UserDTO.ValidRefreshTokenResponse(userInfo, newAccessToken, newRefreshToken)
 
     }
 

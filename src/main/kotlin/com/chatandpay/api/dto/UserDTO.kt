@@ -99,4 +99,10 @@ class UserDTO {
 
     )
 
+    data class ValidRefreshTokenResponse(
+        val userPk: String?,
+        val accessToken: String?,
+        val refreshToken: String?,
+    ): ApiResponse()
+
 }

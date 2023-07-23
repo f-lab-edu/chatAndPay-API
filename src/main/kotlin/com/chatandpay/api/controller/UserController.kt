@@ -57,7 +57,7 @@ class UserController(
         response: HttpServletResponse,
         @CookieValue(value = "accessToken") accessToken: String,
         @CookieValue(value = "refreshToken") refreshToken: String,
-    ) : ResponseEntity<ValidRefreshTokenResponse>{
+    ) : ResponseEntity<UserDTO.ValidRefreshTokenResponse>{
 
         val tokens = jwtTokenProvider.regenerateToken(accessToken, refreshToken)
 
