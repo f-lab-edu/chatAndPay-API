@@ -29,7 +29,7 @@ class AccountCheck  (
         val payUser = accountRepository.findById(dto.accountId)?.payUser
                 ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
 
-        val openApiDto = OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
+        val openApiDto = OpenApiDTO.OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
         val outputMoney = openApiService.withdrawMoney(openApiDto)
 
         val response = accountService.chargeWallet(outputMoney)
@@ -42,7 +42,7 @@ class AccountCheck  (
     @Transactional
     fun saveAccount(dto: AccountDTO.OtherBankAccountRequestDTO) : AccountDTO.OtherBankAccountResponseDTO {
 
-        val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
+        val inquiry = OpenApiDTO.RealNameInquiryRequestDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
 
         val selectedUser = userRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
