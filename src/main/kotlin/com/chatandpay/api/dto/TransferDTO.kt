@@ -46,7 +46,8 @@ class TransferDTO {
         val senderId: Long,
         @field:Size(min = 3, max = 3, message = "은행 코드는 3자리의 숫자입니다.")
         val bankCode: String,
-        @field:Pattern(regexp = "^[1-9]*\$", message =  "Type Error: accountNumber - 송신계좌")
+        @field:Pattern(regexp = "^[1-9]*\$", message =  "계좌는 숫자만 입력할 수 있습니다.")
+        @field:Size(min = 8, max = 20, message = "계좌번호는 8~20자 사이입니다.")
         val accountNumber: String,
         @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
