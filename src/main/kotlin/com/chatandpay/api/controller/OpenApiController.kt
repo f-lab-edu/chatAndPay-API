@@ -9,6 +9,7 @@ import com.chatandpay.api.service.OpenApiService
 import lombok.RequiredArgsConstructor
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/openapi")
@@ -32,7 +33,7 @@ class OpenApiController (val openApiService : OpenApiService) {
     }
 
     @PostMapping("/real_name")
-    fun getAccountRealName(@RequestBody inquiryDto: OpenApiDTO.RealNameInquiryRequestDTO): ResponseEntity<OpenApiDTO.RealNameInquiryResponseDTO> {
+    fun getAccountRealName(@RequestBody @Valid inquiryDto: OpenApiDTO.RealNameInquiryRequestDTO): ResponseEntity<OpenApiDTO.RealNameInquiryResponseDTO> {
 
         val response = openApiService.getInquiryRealName(inquiryDto)
         return ResponseEntity.ok(response)
