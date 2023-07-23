@@ -6,6 +6,7 @@ import com.chatandpay.api.service.TransferService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/transfers")
@@ -16,7 +17,7 @@ class TransferController (
 
 
     @PostMapping("")
-    fun sendTransfer(@RequestBody request: TransferDTO.ReceiveTransferRequestDTO): ResponseEntity<TransferDTO.ReceiveTransferResponseDTO> {
+    fun sendTransfer(@RequestBody @Valid request: TransferDTO.ReceiveTransferRequestDTO): ResponseEntity<TransferDTO.ReceiveTransferResponseDTO> {
 
         val response = redissonLockFacade.sendTransfer(request)
         return ResponseEntity.ok(response)
@@ -33,7 +34,7 @@ class TransferController (
     }
 
     @PostMapping("/interbank")
-    fun sendOtherBankTransfer(@RequestBody request: TransferDTO.OtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
+    fun sendOtherBankTransfer(@RequestBody @Valid request: TransferDTO.OtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
 
         val response = transferService.sendOtherBankTransfer(request)
         return ResponseEntity.ok(response)
@@ -41,7 +42,7 @@ class TransferController (
     }
 
     @PostMapping("/registered")
-    fun sendMyOtherBankTransfer(@RequestBody request: TransferDTO.RegOtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
+    fun sendMyOtherBankTransfer(@RequestBody @Valid request: TransferDTO.RegOtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
 
         val response = transferService.sendMyOtherBankTransfer(request)
         return ResponseEntity.ok(response)
@@ -59,7 +60,7 @@ class TransferController (
 
 
     @PostMapping("/change")
-    fun changePendingTransferState(@RequestBody request: TransferDTO.ChangePendingTransferRequestDTO) : ResponseEntity<TransferDTO.ChangePendingTransferResponseDTO> {
+    fun changePendingTransferState(@RequestBody @Valid request: TransferDTO.ChangePendingTransferRequestDTO) : ResponseEntity<TransferDTO.ChangePendingTransferResponseDTO> {
 
         val response = transferService.changePendingTransferState(request)
         return ResponseEntity.ok(response)

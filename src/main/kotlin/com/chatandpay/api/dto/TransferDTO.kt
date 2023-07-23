@@ -4,6 +4,9 @@ import com.chatandpay.api.common.ApiResponse
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.util.*
+import javax.validation.constraints.Min
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 class TransferDTO {
 
@@ -12,9 +15,10 @@ class TransferDTO {
 
         val senderId: Long,
         val receiverId: Long,
+        @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
 
-    ): ApiResponse()
+    )
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class ReceiveTransferResponseDTO(
@@ -40,8 +44,11 @@ class TransferDTO {
     data class OtherBankTransferRequestDTO(
 
         val senderId: Long,
+        @field:Size(min = 3, max = 3, message = "은행 코드는 3자리의 숫자입니다.")
         val bankCode: String,
+        @field:Pattern(regexp = "^[1-9]*\$", message =  "Type Error: accountNumber - 송신계좌")
         val accountNumber: String,
+        @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
 
     )
@@ -61,6 +68,7 @@ class TransferDTO {
 
         val senderId: Long,
         val senderBankAccount: Long,
+        @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
 
     )
