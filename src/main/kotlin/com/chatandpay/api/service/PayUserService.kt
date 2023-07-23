@@ -34,7 +34,7 @@ class PayUserService(
             findUser.withdrawnYn = "N"
             findUser
         } else {
-            PayUser(ci = payUser.ci, user = user, userSeqNo = payUser.userSeqNo, wallet = null, birthDate = payUser.birthDate)
+            PayUser(ci = payUser.ci, user = user, wallet = null, birthDate = payUser.birthDate)
         }
 
         val savedUser = payUserRepository.save(regUser) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")

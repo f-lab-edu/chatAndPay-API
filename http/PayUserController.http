@@ -5,8 +5,7 @@ Content-Type: application/json
 
 {
     "ci" : "ci",
-    "user_id": 16,
-    "user_seq_no" : "userSeqNo",
+    "user_id": 2,
     "birth_date": "20230501"
 }
 

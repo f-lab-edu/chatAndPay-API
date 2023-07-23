@@ -2,6 +2,7 @@ package com.chatandpay.api.domain
 
 import lombok.AllArgsConstructor
 import lombok.NoArgsConstructor
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -19,7 +20,7 @@ data class PayUser(
     @OneToOne
     @JoinColumn(name = "user_id")
     var user: User? = null,
-    val userSeqNo: String,
+    val userSeqNo: String = UUID.randomUUID().toString(),
     val birthDate: String,
     @OneToOne(mappedBy = "payUser", cascade = [CascadeType.ALL])
     var wallet: Wallet? = null,

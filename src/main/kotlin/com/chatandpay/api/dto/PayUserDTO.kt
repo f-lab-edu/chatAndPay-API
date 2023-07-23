@@ -9,10 +9,11 @@ class PayUserDTO {
 
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class SignUpRequestPayUserDTO(
+
         val ci: String,
         val userId: Long,
-        val userSeqNo: String,
         val birthDate: String,
+
     )
 
     data class SignUpResponsePayUserDTO (
