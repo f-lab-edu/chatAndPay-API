@@ -41,12 +41,11 @@ class UserController(
     @PostMapping("/token/login")
     fun tokenLoginUser(@RequestBody @Valid requestBody: UserDTO.AuthTokenUserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
-        val email = requestBody.email
-        val loginUser = userService.emailLogin(email)
-        val tokens = userService.tokenLoginUser(email)
-        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens.accessToken) }
+        val loginUser = userService.emailLogin(requestBody.email)
+        val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
+        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
 
-        CookieUtil.addTokenCookies(tokens.accessToken, tokens.refreshToken, response)
+        CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
         return ResponseEntity.ok(responseBody)
 

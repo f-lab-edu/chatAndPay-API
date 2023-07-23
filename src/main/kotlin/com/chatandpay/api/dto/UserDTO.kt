@@ -105,4 +105,9 @@ class UserDTO {
         val refreshToken: String?,
     ): ApiResponse()
 
+    data class TokenInfo(
+        val accessToken: String,
+        val refreshToken: String,
+    )
+
 }

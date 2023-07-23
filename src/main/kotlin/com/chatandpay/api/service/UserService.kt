@@ -4,7 +4,6 @@ import com.chatandpay.api.common.JwtTokenProvider
 import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
-import com.chatandpay.api.dto.TokenInfo
 import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
@@ -52,21 +51,8 @@ class UserService(
         return userRepository.save(regUser)
     }
 
-    fun tokenLoginUser(email: String) : TokenInfo {
 
-        val findUser = userRepository.findByEmail(email)
-            ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
-
-        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role)
-        val refreshToken: String = jwtTokenProvider.createRefreshToken()
-
-        saveTokenToRedis(findUser, accessToken, refreshToken)
-
-        return TokenInfo(accessToken, refreshToken)
-    }
-
-
-    fun tokenLoginUser(id: Long) : TokenInfo {
+    fun tokenLoginUser(id: Long) : UserDTO.TokenInfo {
 
         val findUser = userRepository.findById(id)
             ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
@@ -76,7 +62,7 @@ class UserService(
 
         saveTokenToRedis(findUser, accessToken, refreshToken)
 
-        return TokenInfo(accessToken, refreshToken)
+        return UserDTO.TokenInfo(accessToken, refreshToken)
     }
 
     fun saveTokenToRedis(findUser: User, accessToken: String, refreshToken: String) {
