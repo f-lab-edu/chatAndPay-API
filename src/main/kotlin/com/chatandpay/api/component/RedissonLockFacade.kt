@@ -16,8 +16,18 @@ class RedissonLockFacade (
 ){
 
     fun sendTransfer(request: TransferDTO.ReceiveTransferRequestDTO) : TransferDTO.ReceiveTransferResponseDTO? {
-
         val uuid = UUID.randomUUID()
+        return redissonLockBind{ transferService.sendTransfer(request, uuid) }
+    }
+
+
+    fun receiveTransfer(uuid: UUID) : TransferDTO.SendTransferResponseDTO? {
+        return redissonLockBind { transferService.receiveTransfer(uuid) }
+    }
+
+
+    fun <T> redissonLockBind(inputFunc: () -> T) : T {
+
         val lock: RLock = redissonClient.getLock("transfer")
 
         try {
@@ -25,13 +35,13 @@ class RedissonLockFacade (
             if (!available) {
                 throw RestApiException("lock 획득 실패")
             }
-            return transferService.sendTransfer(request, uuid)
+            return inputFunc()
         } catch (e: Exception) {
             throw RestApiException(e.message)
         } finally {
             lock.unlock()
         }
-    }
 
+    }
 
 }
