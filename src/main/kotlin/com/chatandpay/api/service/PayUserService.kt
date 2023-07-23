@@ -1,7 +1,6 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.code.ErrorCode
-import com.chatandpay.api.dto.SignUpPayUserDTO
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.dto.PayUserDTO
@@ -21,7 +20,7 @@ class PayUserService(
 ) {
 
     @Transactional
-    fun register(payUser : SignUpPayUserDTO): PayUserDTO? {
+    fun register(payUser : PayUserDTO.SignUpRequestPayUserDTO): PayUserDTO.SignUpResponsePayUserDTO? {
 
         val findUser = payUserRepository.findByCi(payUser.ci)
 
@@ -42,7 +41,7 @@ class PayUserService(
         val wallet = Wallet(money = 0, payUser = savedUser)
         savedUser.wallet = walletRepository.save(wallet) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
 
-        return savedUser.id?.let { PayUserDTO(user.name, user.cellphone, it, savedUser.userSeqNo, savedUser.birthDate) }
+        return savedUser.id?.let { PayUserDTO.SignUpResponsePayUserDTO(user.name, user.cellphone, it, savedUser.userSeqNo, savedUser.birthDate) }
 
     }
 
