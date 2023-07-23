@@ -13,10 +13,10 @@ class AccountDTO {
     data class OtherBankAccountRequestDTO(
         @field:Size(min = 3, max = 3, message = "은행 코드는 3자리의 숫자입니다.")
         val bankCode: String,
-        @field:Pattern(regexp = "^[1-9]*\$", message =  "계좌는 숫자만 입력할 수 있습니다.")
+        @field:Pattern(regexp = "^[0-9]*\$", message = "계좌는 숫자만 입력할 수 있습니다.")
         @field:Size(min = 8, max = 20, message = "계좌번호는 8~20자 사이입니다.")
         val accountNumber: String,
-        @field:Size(min = 8, max = 20, message = "계좌별칭은 1자 이상 입력해야 합니다.")
+        @field:Size(min = 1, message = "계좌별칭은 1자 이상 입력해야 합니다.")
         val accountName: String,
         @field:Size(min = 1, max = 1, message = "Input Error: autoDebitAgree - Y/N")
         val autoDebitAgree: String,
