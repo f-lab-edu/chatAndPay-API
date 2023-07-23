@@ -16,6 +16,7 @@ class UserDTO {
 
         @field:NotBlank(message = "휴대전화번호를 입력하세요.")
         @field:Size(min = 11, max = 11, message = "휴대전화번호는 11자리로 입력해주세요.")
+        @field:Pattern(regexp = "^[1-9]*\$", message = "휴대전화번호는 숫자로만 입력해 주세요.")
         var cellphone: String,
 
         @field:Positive(message = "Verification ID 미입력")
@@ -60,6 +61,7 @@ class UserDTO {
 
         @field:NotBlank(message = "휴대전화번호를 입력하세요.")
         @field:Size(min = 11, max = 11, message = "휴대전화번호는 11자리로 입력해주세요.")
+        @field:Pattern(regexp = "^[1-9]*\$", message = "휴대전화번호는 숫자로만 입력해 주세요.")
         var cellphone: String,
 
     )
@@ -70,10 +72,12 @@ class UserDTO {
 
         @field:NotBlank(message = "휴대전화번호를 입력하세요.")
         @field:Size(min = 11, max = 11, message = "휴대전화번호는 11자리로 입력해주세요.")
+        @field:Pattern(regexp = "^[1-9]*\$", message = "휴대전화번호는 숫자로만 입력해 주세요.")
         var cellphone: String,
 
         @field:NotBlank(message = "인증번호를 입력하세요.")
-        @field:Size(min = 6, max = 6, message = "인증번호는 6자리의 숫자로 입력해주세요.")
+        @field:Size(min = 6, max = 6, message = "인증번호는 6자리로 입력해주세요.")
+        @field:Pattern(regexp = "^[1-9]*\$", message = "휴대전화번호는 숫자로만 입력해 주세요.")
         val authNumber: String
 
     )
@@ -95,6 +99,7 @@ class UserDTO {
 
         @field:NotBlank(message = "휴대전화번호를 입력하세요.")
         @field:Size(min = 11, max = 11, message = "휴대전화번호는 11자리로 입력해주세요.")
+        @field:Pattern(regexp = "^[1-9]*\$", message = "휴대전화번호는 숫자로만 입력해 주세요.")
         val cellphone: String
 
     )
