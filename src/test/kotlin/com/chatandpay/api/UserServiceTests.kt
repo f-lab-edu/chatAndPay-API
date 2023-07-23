@@ -1,10 +1,11 @@
 package com.chatandpay.api
 
+import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.PayUser
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.Wallet
 import com.chatandpay.api.domain.sms.SmsAuthentication
-import com.chatandpay.api.dto.AuthConfirmRequestDTO
+import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import com.chatandpay.api.service.PayUserService
@@ -61,41 +62,26 @@ class UserServiceTests {
     fun register_ValidUser() {
 
         // given
-        val user = User(null,"01012345678",null, null, "이름", 1)
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","01012345678",0, null, null, null)
         val authData = SmsAuthentication(null, "123456", "01012345678", true)
-        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId)
+        val regUser = User(name = requestDto.name, password = "", userId= "", cellphone = requestDto.cellphone, role = UserRole.USER, verificationId = requestDto.verificationId)
 
-        given(authRepository.findById(user.verificationId)).willReturn(authData)
-        given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
+        given(authRepository.findById(requestDto.verificationId)).willReturn(authData)
+        given(userRepository.findByCellphone(requestDto.cellphone)).willReturn(null)
         given(userRepository.save(regUser)).willReturn(regUser)
 
         // when
-        val result = userService.register(user)
+        val result = userService.register(requestDto)
 
         // then
         assertNotNull(result)
-        assertEquals(user.name, result!!.name)
-        assertEquals(user.cellphone, result.cellphone)
-        assertEquals(user.verificationId, result.verificationId)
+        assertEquals(requestDto.name, result!!.name)
+        assertEquals(requestDto.cellphone, result.cellphone)
+        assertEquals(requestDto.verificationId, result.verificationId)
 
     }
 
-
-
-    @Test
-    @DisplayName("회원 가입 검증 테스트 - 이름/휴대번호 공란")
-    fun register_InvalidNameOrCellphone_ThrowsIllegalArgumentException() {
-
-        // given
-        val user = User(null,"",null, null, "", 1)
-
-        // when
-        val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.register(user) }
-
-        // then
-        assertEquals("이름, 휴대전화번호를 모두 입력하세요.", exception.message)
-
-    }
 
 
     @Test
@@ -103,7 +89,8 @@ class UserServiceTests {
     fun register_NoData_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(null,"01082828282",null, null, "테스트", 9)
+        val user =
+            UserDTO.UserRequestDTO("이름","01012345678",0, null, null, null)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.register(user) }
@@ -120,8 +107,9 @@ class UserServiceTests {
     fun register_DifferentCellphone_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(null,"01082828282",null, null, "테스트", 3)
-        val authData = SmsAuthentication(null, "123456", "01012345678", false)
+        val user =
+            UserDTO.UserRequestDTO("이름","01012345678",0, null, null, null)
+        val authData = SmsAuthentication(null, "123456", "01056785678", false)
 
         given(authRepository.findById(user.verificationId)).willReturn(authData)
 
@@ -139,7 +127,8 @@ class UserServiceTests {
     fun register_NoAuth_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(null,"01012345678",null, null, "테스트", 1)
+        val user =
+            UserDTO.UserRequestDTO("이름","01012345678",0, null, null, null)
         val authData = SmsAuthentication(null, "123456", "01012345678", false)
 
         given(authRepository.findById(user.verificationId)).willReturn(authData)
@@ -159,12 +148,12 @@ class UserServiceTests {
     fun login_NoId_ThrowsEntityNotFoundException() {
 
         // given
-        val user = User(null,"","testId", "", "", -1)
+        val requestDto = UserDTO.UserLoginRequestDTO("testFailId","testPassword")
 
-        given(userRepository.findByUserId(user.userId!!)).willReturn(null)
+        given(userRepository.findByUserId(requestDto.userId)).willReturn(null)
 
         // when
-        val exception: Throwable = assertThrows(EntityNotFoundException::class.java) { userService.login(user) }
+        val exception: Throwable = assertThrows(EntityNotFoundException::class.java) { userService.login(requestDto) }
 
         // then
         assertEquals("해당 아이디로 가입된 사용자가 없습니다.", exception.message)
@@ -177,13 +166,13 @@ class UserServiceTests {
     fun login_IncorrectPw_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(null,"01012345678","testId", "testPassword", "이름", 1)
-        val dbUser = User(null,"01012345678","testId", "testPassword22", "이름", 1)
+        val requestDto = UserDTO.UserLoginRequestDTO("testId","testPassword")
+        val dbUser = User(null,"01012345678","testId", "","testPassword22", "이름", 1, UserRole.USER)
 
-        given(userRepository.findByUserId(user.userId!!)).willReturn(dbUser)
+        given(userRepository.findByUserId(requestDto.userId)).willReturn(dbUser)
 
         // when
-        val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.login(user) }
+        val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.login(requestDto) }
 
         // then
         assertEquals("비밀번호가 일치하지 않습니다.", exception.message)
@@ -197,13 +186,15 @@ class UserServiceTests {
     fun login_ValidUser() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val requestDto = UserDTO.UserLoginRequestDTO("testId","testPassword")
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+
 
         given(userRepository.findByUserId(user.userId!!)).willReturn(user)
         given(passwordEncoder.matches(user.password, user.password)).willReturn(true)
 
         // when
-        val result = userService.login(user)
+        val result = userService.login(requestDto)
 
         // then
         assertNotNull(result)
@@ -219,11 +210,12 @@ class UserServiceTests {
     fun authJoin_ExistingUser_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        given(userRepository.findByCellphone(user.cellphone)).willReturn(user)
+        val requestDto = UserDTO.UserSMSRequestDTO("01088888888")
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01088888888", role= UserRole.USER, verificationId = 1)
+        given(userRepository.findByCellphone(requestDto.cellphone)).willReturn(user)
 
         // when
-        val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.authJoin(user) }
+        val exception: Throwable = assertThrows(IllegalArgumentException::class.java) { userService.authJoin(requestDto) }
 
         // then
         assertEquals("해당 휴대전화번호로 가입된 사용자가 있습니다.", exception.message)
@@ -235,8 +227,10 @@ class UserServiceTests {
     fun authJoin_ValidUser() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
+        val requestDto = UserDTO.UserSMSRequestDTO("01012345678")
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+
+        given(userRepository.findByCellphone(requestDto.cellphone)).willReturn(null)
 
         // given(randomUtilMockedStatic.generateRandomSixDigits()).willReturn("123456")
         every { RandomUtil.generateRandomSixDigits() } returns "123456"
@@ -247,7 +241,7 @@ class UserServiceTests {
         doReturn(receiveSmsAuth.id!!).`when`(smsService).authSendSms(user.cellphone)
 
         // when
-        val result = userService.authJoin(user)
+        val result = userService.authJoin(requestDto)
 
         // then
         assertNotNull(result)
@@ -260,7 +254,7 @@ class UserServiceTests {
     fun authLogin_ExistingUser_ThrowsEntityNotFoundException() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         given(userRepository.findByCellphone(user.cellphone)).willReturn(null)
 
         // when
@@ -277,7 +271,7 @@ class UserServiceTests {
 
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         given(userRepository.findByCellphone(user.cellphone)).willReturn(user)
 
         //given(RandomUtil.generateRandomSixDigits()).willReturn("123456")
@@ -305,9 +299,9 @@ class UserServiceTests {
     fun authLoginConfirm_ExistingUser_ThrowsIllegalArgumentException() {
 
         // given
-        val trySmsAuth = SmsAuthentication(null, "123456", "01042424242")
-        val givenSmsAuth = SmsAuthentication(null, "123456", "01042424242", false)
-        val authConfirm = AuthConfirmRequestDTO("이름", "01042424242", "123456")
+        val trySmsAuth = SmsAuthentication(null, "123456", "01078787878")
+        val givenSmsAuth = SmsAuthentication(null, "123456", "01078787878", false)
+        val authConfirm = UserDTO.AuthConfirmRequestDTO("01078787878", "123456")
 
         given(authRepository.findByCellphone(authConfirm.cellphone)).willReturn(givenSmsAuth)
         given(smsService.authSendSmsConfirm(trySmsAuth)).willReturn(givenSmsAuth)
@@ -329,7 +323,7 @@ class UserServiceTests {
         // TODO - 내부 authConfirm 호출 건 : 필요 여부 확인 필요
 
         // given
-        val authConfirm = AuthConfirmRequestDTO("이름", "01012341234", "123456")
+        val authConfirm = UserDTO.AuthConfirmRequestDTO("01012341234", "123456")
         given(authRepository.findByCellphone(authConfirm.cellphone)).willReturn(null)
 
         // when
@@ -350,7 +344,7 @@ class UserServiceTests {
 
         // given
         val smsAuth = SmsAuthentication(1, "123456", "01012341234", false)
-        val authCfmReq = AuthConfirmRequestDTO(smsAuth.phoneNumber, "01012341234", "444444")
+        val authCfmReq = UserDTO.AuthConfirmRequestDTO("01012341234", "567890")
 
         given(authRepository.findByCellphone(smsAuth.phoneNumber)).willReturn(smsAuth)
 
@@ -372,7 +366,7 @@ class UserServiceTests {
 
         // given
         val smsAuth = SmsAuthentication(1, "123456", "01012341234", true)
-        val authCfmReq = AuthConfirmRequestDTO(smsAuth.phoneNumber, "01012341234", "123456")
+        val authCfmReq = UserDTO.AuthConfirmRequestDTO("01012341234", "123456")
 
         given(authRepository.findByCellphone(smsAuth.phoneNumber)).willReturn(smsAuth)
 
@@ -392,7 +386,7 @@ class UserServiceTests {
     fun authLoginConfirm_ValidUser() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         given(userRepository.findByCellphone(user.cellphone)).willReturn(user)
 
         //given(RandomUtil.generateRandomSixDigits()).willReturn("123456")
@@ -421,7 +415,7 @@ class UserServiceTests {
     fun authConfirm_NonExistingCellphone_ThrowsEntityNotFoundException() {
 
         // given
-        val authConfirm = AuthConfirmRequestDTO("이름", "01012341234", "123456")
+        val authConfirm = UserDTO.AuthConfirmRequestDTO("01012341234", "123456")
         given(authRepository.findByCellphone(authConfirm.cellphone)).willReturn(null)
 
         // when
@@ -440,7 +434,7 @@ class UserServiceTests {
 
         // given
         val smsAuth = SmsAuthentication(1, "123456", "01012341234", false)
-        val authCfmReq = AuthConfirmRequestDTO(smsAuth.phoneNumber, "01012341234", "444444")
+        val authCfmReq = UserDTO.AuthConfirmRequestDTO("01012341234", "567890")
 
         given(authRepository.findByCellphone(smsAuth.phoneNumber)).willReturn(smsAuth)
 
@@ -460,7 +454,7 @@ class UserServiceTests {
 
         // given
         val smsAuth = SmsAuthentication(1, "123456", "01012341234", true)
-        val authCfmReq = AuthConfirmRequestDTO(smsAuth.phoneNumber, "01012341234", "123456")
+        val authCfmReq = UserDTO.AuthConfirmRequestDTO("01012341234", "123456")
 
         given(authRepository.findByCellphone(smsAuth.phoneNumber)).willReturn(smsAuth)
 
@@ -485,7 +479,7 @@ class UserServiceTests {
         // given
         val trySmsAuth = SmsAuthentication(null, "121212", "01012121234")
         val givenSmsAuth = SmsAuthentication(null, "121212", "01012121234", false)
-        val authCfmReq = AuthConfirmRequestDTO(trySmsAuth.phoneNumber, "01012121234", "121212")
+        val authCfmReq = UserDTO.AuthConfirmRequestDTO("01012121234", "121212")
 
         given(authRepository.findByCellphone(trySmsAuth.phoneNumber)).willReturn(givenSmsAuth)
         given(smsService.authSendSmsConfirm(trySmsAuth)).willReturn(givenSmsAuth)
@@ -506,14 +500,15 @@ class UserServiceTests {
     fun updateUser_NonuserId_ThrowsEntityNotFoundException() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","0102342343",2, null, "id", "password")
         val idx : Long = -1
 
         given(userRepository.findById(idx)).willReturn(null)
 
         // when
         val exception: Throwable = assertThrows(EntityNotFoundException::class.java) {
-            userService.updateUser(idx, user)
+            userService.updateUser(idx, requestDto)
         }
 
         // then
@@ -526,15 +521,17 @@ class UserServiceTests {
     fun updateUser_ExistingUserId_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","0102342343",2, null, "id", "password")
+        val dbUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         val idx : Long = 1
 
-        given(userRepository.findById(idx)).willReturn(user)
-        given(userRepository.existsByUserIdAndIdNot(user.userId!!, idx)).willReturn(true)
+        given(userRepository.findById(idx)).willReturn(dbUser)
+        given(userRepository.existsByUserIdAndIdNot(requestDto.userId!!, idx)).willReturn(true)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) {
-            userService.updateUser(idx, user)
+            userService.updateUser(idx, requestDto)
         }
 
         // then
@@ -546,15 +543,17 @@ class UserServiceTests {
     fun updateUser_ExistingCellphone_ThrowsIllegalArgumentException() {
 
         // given
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","0102342343",2, null, "id", "password")
+        val dbUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         val idx : Long = 1
 
-        given(userRepository.findById(idx)).willReturn(user)
-        given(userRepository.existsByCellphoneAndIdNot(user.cellphone, idx)).willReturn(true)
+        given(userRepository.findById(idx)).willReturn(dbUser)
+        given(userRepository.existsByCellphoneAndIdNot(requestDto.cellphone, idx)).willReturn(true)
 
         // when
         val exception: Throwable = assertThrows(IllegalArgumentException::class.java) {
-            userService.updateUser(idx, user)
+            userService.updateUser(idx, requestDto)
         }
 
         // then
@@ -568,8 +567,10 @@ class UserServiceTests {
 
         // given
         val idx : Long = 1
-        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", verificationId = 1)
-        val newUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","01012345678",2, null, "testId", "testPassword")
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+        val newUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
 
         newUser.userId = "newUserId"
         newUser.password = "newPassword"
@@ -579,7 +580,7 @@ class UserServiceTests {
         given(userRepository.save(user)).willReturn(newUser)
 
         // when
-        val result = userService.updateUser(idx, newUser)
+        val result = userService.updateUser(idx, requestDto)
 
         // then
         assertEquals(newUser.userId, result!!.userId)
@@ -593,9 +594,12 @@ class UserServiceTests {
 
         // given
         val idx : Long = 1
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        val newUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        newUser.password = "newPassword"
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","01012345678",2, null, "testId", "newPassword")
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+        val newUser = User(name = "이름", userId= "testId", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+
+        newUser.password = requestDto.password
         newUser.password = passwordEncoder.encode(newUser.password)
 
         given(userRepository.findById(idx)).willReturn(user)
@@ -603,7 +607,7 @@ class UserServiceTests {
 
 
         // when
-        val result = userService.updateUser(idx, newUser)
+        val result = userService.updateUser(idx, requestDto)
 
         // then
         assertEquals(newUser.password, result!!.password)
@@ -616,16 +620,19 @@ class UserServiceTests {
 
         // given
         val idx : Long = 1
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        val newUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
-        newUser.cellphone = "01012123434"
+        val requestDto =
+            UserDTO.UserRequestDTO("이름","01012123434",2, null, "testId", "newPassword")
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
+        val newUser = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012123434", role= UserRole.USER, verificationId = 1)
+
+        newUser.cellphone = requestDto.cellphone
         newUser.password = newUser.password
 
         given(userRepository.findById(idx)).willReturn(user)
         given(userRepository.save(user)).willReturn(newUser)
 
         // when
-        val result = userService.updateUser(idx, newUser)
+        val result = userService.updateUser(idx, requestDto)
 
         // then
         assertEquals(newUser.cellphone, result!!.cellphone)
@@ -659,7 +666,7 @@ class UserServiceTests {
     fun deleteUser_PayUser_DeleteSuccess() {
         // given
         val idx : Long = 1
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         val payUser = PayUser(1, "ci", user,"userSeqNo", "20230605", null)
         payUser.wallet = Wallet(null,100, payUser)
 
@@ -681,7 +688,7 @@ class UserServiceTests {
     fun deleteUser_NonPayUser_DeleteSuccess() {
         // given
         val idx : Long = 1
-        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", verificationId = 1)
+        val user = User(name = "이름", userId= "testId", password= "testPassword", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
 
         given(userRepository.findById(idx)).willReturn(user)
         given(payUserService.isPayUser(idx)).willReturn(false)

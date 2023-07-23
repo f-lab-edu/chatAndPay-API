@@ -2,6 +2,7 @@ package com.chatandpay.api
 
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.Message
+import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.service.SmsService
 import com.chatandpay.api.service.UserService
 import com.fasterxml.jackson.core.JsonProcessingException
@@ -44,7 +45,7 @@ class ApiApplicationTests {
 
 	@Test
 	fun authLoginConfirm() {
-		userService!!.login(User(userId = "id", name="", cellphone = "", password = "password", verificationId = 0))
+		userService!!.login(UserDTO.UserLoginRequestDTO("id", "password"))
 	}
 
 	@Test

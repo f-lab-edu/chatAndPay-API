@@ -1,5 +1,6 @@
 package com.chatandpay.api
 
+import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.repository.UserRepository
 import org.junit.jupiter.api.Assertions.*
@@ -25,7 +26,7 @@ class UserRepositoryTests {
     fun save_ValidUser() {
 
         // given
-        val user = User(null, "01012345678", null, null, "이름", 1)
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
 
         // when
         val savedUser = userRepository.save(user)
@@ -40,7 +41,7 @@ class UserRepositoryTests {
     @Transactional
     fun findByName_ValidUser() {
         // given
-        val user =  User(null, "01012345678", null, null, "이름", 1)
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         entityManager.persist(user)
 
         // when
@@ -55,7 +56,7 @@ class UserRepositoryTests {
     @Transactional
     fun findByCellphone_ValidUser() {
         // given
-        val user =  User(null, "01012345678", null, null, "이름", 1)
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         entityManager.persist(user)
 
         // when
@@ -71,7 +72,7 @@ class UserRepositoryTests {
     fun findByUserId_ValidUser() {
 
         // given
-        val user =  User(null, "", "testId", null, "", -1)
+        val user = User(name = "", userId= "testId", password= "", cellphone = "", role= UserRole.USER, verificationId = 1)
         entityManager.persist(user)
 
         // when
@@ -88,8 +89,9 @@ class UserRepositoryTests {
     fun existsByCellphoneAndIdNot_ValidUser() {
 
         // given
-        val tryUser = User(1, "01012341234", "testId", null, "시도유저", -1)
-        val existUser = User(null, "01012341234", null, null, "기존유저", 1)
+        val tryUser = User(id = 1, name = "시도유저", userId= "", password= "", cellphone = "01034453445", role= UserRole.USER, verificationId = 1)
+        val existUser = User(null, name = "기존유저", userId= "", password= "", cellphone = "01034453445", role= UserRole.USER, verificationId = 1)
+
         entityManager.persist(existUser)
 
         // when
@@ -105,8 +107,9 @@ class UserRepositoryTests {
     fun existsByUserIdAndIdNot_ValidUser() {
 
         // given
-        val tryUser = User(1, "01012121212", "testId", null, "시도유저", -1)
-        val existUser = User(null, "01012341234", "testId", null, "기존유저", 1)
+        val tryUser = User(id = 1, name = "시도유저", userId= "testId", password= "", cellphone = "01012121212", role= UserRole.USER, verificationId = 1)
+        val existUser = User(null, name = "기존유저", userId= "testId", password= "", cellphone = "01034453445", role= UserRole.USER, verificationId = 1)
+
         entityManager.persist(existUser)
 
 
@@ -125,7 +128,7 @@ class UserRepositoryTests {
     fun findById_ValidUser() {
 
         // given
-        val user = User(null, "01012345678", null, null, "이름", 1)
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         entityManager.persist(user)
 
         // when
@@ -143,7 +146,7 @@ class UserRepositoryTests {
     fun delete_ValidUser() {
 
         // given
-        val user = User(null, "01012345678", null, null, "이름", 1)
+        val user = User(name = "이름", userId= "", password= "", cellphone = "01012345678", role= UserRole.USER, verificationId = 1)
         entityManager.persist(user)
 
         // when
