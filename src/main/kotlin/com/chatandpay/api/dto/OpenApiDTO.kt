@@ -4,6 +4,8 @@ import com.chatandpay.api.common.ApiResponse
 import com.chatandpay.api.domain.PayUser
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 class OpenApiDTO {
 
@@ -20,7 +22,10 @@ class OpenApiDTO {
     data class RealNameInquiryRequestDTO(
 
         var bankTranId: String,
+        @field:Size(min = 3, max = 3, message = "은행 코드는 3자리의 숫자입니다.")
         val bankCodeStd: String,
+        @field:Pattern(regexp = "^[1-9]*\$", message =  "계좌는 숫자만 입력할 수 있습니다.")
+        @field:Size(min = 8, max = 20, message = "계좌번호는 8~20자 사이입니다.")
         val accountNum: String,
         var accountHolderInfoType: String = " ",
         var accountHolderInfo: String,
