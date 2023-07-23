@@ -10,13 +10,11 @@ import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.UserService
 import com.chatandpay.api.utils.CookieUtil
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 
 @RestController
-@Validated
 @RequestMapping("/users")
 class UserController(
     val userService: UserService,
