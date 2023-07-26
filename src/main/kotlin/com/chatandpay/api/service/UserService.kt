@@ -156,8 +156,23 @@ class UserService(
             throw IllegalArgumentException("이미 존재하는 아이디입니다.")
         }
 
-        if (userRepository.existsByCellphoneAndIdNot(userRequest.cellphone, id)){
-            throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
+
+        if(findUser.cellphone != userRequest.cellphone) {
+
+            if (userRepository.existsByCellphoneAndIdNot(userRequest.cellphone, id)){
+                throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
+            }
+
+            if(findUser.verificationId == userRequest.verificationId) {
+                throw IllegalArgumentException("인증이 완료되지 않았습니다.")
+            }
+
+            val authData = userRequest.verificationId.let { authRepository.findById(it) } ?: throw IllegalArgumentException("인증 데이터를 찾을 수 없습니다.")
+
+            if(!authData.isVerified) {
+                throw IllegalArgumentException("인증이 완료되지 않았습니다.")
+            }
+
         }
 
         val isIdRegistered = !findUser.userId.isNullOrEmpty() && !findUser.password.isNullOrEmpty()

@@ -75,8 +75,7 @@ Content-Type: application/json
 {
     "name"       : "고로케케",
     "cellphone"  : "01012341234",
-    "user_id"    : "",
-    "password"   : ""
+    "verification_id": "24"
 }
 
 ### 5.2 회원 정보 수정 : id / password 등록
@@ -88,7 +87,8 @@ Content-Type: application/json
     "name"       : "고로케케",
     "cellphone"  : "01012341234",
     "user_id"    : "id",
-    "password"   : "password1"
+    "password"   : "password1",
+    "verification_id": "24"
 }
 
 
@@ -100,7 +100,8 @@ Content-Type: application/json
 {
     "name"       : "고로케케",
     "cellphone"  : "01012341234",
-    "password"   : "password"
+    "password"   : "password",
+    "verification_id": "24"
 }
 
 
