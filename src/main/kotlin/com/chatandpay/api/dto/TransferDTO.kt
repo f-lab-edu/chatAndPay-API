@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import java.util.*
 import javax.validation.constraints.Min
 import javax.validation.constraints.Pattern
+import javax.validation.constraints.Positive
 import javax.validation.constraints.Size
 
 class TransferDTO {
@@ -13,7 +14,9 @@ class TransferDTO {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class ReceiveTransferRequestDTO(
 
+        @field:Positive(message = "Input Error: senderId 미입력")
         val senderId: Long,
+        @field:Positive(message = "Input Error: receiverId 미입력")
         val receiverId: Long,
         @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
@@ -67,7 +70,9 @@ class TransferDTO {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class RegOtherBankTransferRequestDTO(
 
+        @field:Positive(message = "Input Error: senderId 미입력")
         val senderId: Long,
+        @field:Positive(message = "Input Error: senderBankAccount 미입력")
         val senderBankAccount: Long,
         @field:Min(value = 1, message = "1원보다 큰 금액만 송금할 수 있습니다.")
         val amount: Int
@@ -88,6 +93,7 @@ class TransferDTO {
     data class ChangePendingTransferRequestDTO(
 
         val uuid: UUID,
+        @field:Positive(message = "Input Error: userId 미입력")
         val requestUserId: Long,
         val changeType: String,
     )

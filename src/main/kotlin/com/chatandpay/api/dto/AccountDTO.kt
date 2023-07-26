@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 import javax.validation.constraints.Min
 import javax.validation.constraints.Pattern
+import javax.validation.constraints.Positive
 import javax.validation.constraints.Size
 
 class AccountDTO {
@@ -20,6 +21,7 @@ class AccountDTO {
         val accountName: String,
         @field:Size(min = 1, max = 1, message = "Input Error: autoDebitAgree - Y/N")
         val autoDebitAgree: String,
+        @field:Positive(message = "Input Error: userId 미입력")
         val userId: Long,
     )
 
@@ -37,6 +39,7 @@ class AccountDTO {
     data class DepositWalletRequestDTO (
         @field:Min(value = 1, message = "1원보다 큰 금액만 충전할 수 있습니다.")
         val depositMoney: Int,
+        @field:Positive(message = "Input Error: accountId 미입력")
         val accountId: Long,
     )
 
