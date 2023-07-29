@@ -16,7 +16,7 @@ class SecurityUser(user: User) : UserDetails {
 
     override fun getPassword() = user.password
 
-    override fun getUsername() = user.id.toString()
+    override fun getUsername() = user.cellphone
 
     override fun isAccountNonExpired() = true
 

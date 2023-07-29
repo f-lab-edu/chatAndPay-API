@@ -1,6 +1,7 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.common.JwtTokenProvider
+import com.chatandpay.api.common.SecurityUser
 import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
@@ -9,6 +10,7 @@ import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
@@ -51,13 +53,26 @@ class UserService(
         return userRepository.save(regUser)
     }
 
+    fun tokenLoginUser(email: String) : UserDTO.TokenInfo {
+
+        val findUser = userRepository.findByEmail(email)
+            ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
+
+        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role, findUser.cellphone)
+        val refreshToken: String = jwtTokenProvider.createRefreshToken()
+
+        saveTokenToRedis(findUser, accessToken, refreshToken)
+
+        return UserDTO.TokenInfo(accessToken, refreshToken)
+    }
+
 
     fun tokenLoginUser(id: Long) : UserDTO.TokenInfo {
 
         val findUser = userRepository.findById(id)
             ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
 
-        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role)
+        val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role, findUser.cellphone)
         val refreshToken: String = jwtTokenProvider.createRefreshToken()
 
         saveTokenToRedis(findUser, accessToken, refreshToken)

@@ -3,10 +3,7 @@ package com.chatandpay.api.common
 import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.RedisService
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
@@ -63,7 +60,7 @@ class JwtTokenProvider (
                         .findFirst()
                         .orElseThrow{ RestApiException("토큰 발급 오류") }
 
-        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it) }
+        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it, findMember.username) }
         val newRefreshToken = createRefreshToken()
 
         invalidateToken(refreshToken, "refresh")
@@ -72,10 +69,11 @@ class JwtTokenProvider (
 
     }
 
-    fun createAccessToken(userPk: Long?, role: UserRole): String {
+    fun createAccessToken(userPk: Long?, role: UserRole, cellphone: String): String {
 
         val claims = Jwts.claims().setSubject(userPk.toString())
         claims["roles"] = role
+        claims["cellphone"] = cellphone
         val now = Date()
 
         return Jwts.builder()
@@ -98,23 +96,22 @@ class JwtTokenProvider (
 
     }
 
-    fun getAuthentication(token: String?): Authentication {
-        val userDetails = userDetailsService.loadUserByUsername(getUserPk(token))
+    fun getAuthentication(token: String): Authentication {
+        val claims: Claims = getUserClaims(token)
+
+        claims["cellphone"] ?: throw RestApiException("잘못된 토큰입니다.")
+
+        val userDetails = userDetailsService.loadUserByUsername(claims.subject)
+
+        if(userDetails.username != claims["cellphone"]) {
+            throw RestApiException("잘못된 토큰입니다.")
+        }
+
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 
-    fun getUserPk(token: String?): String {
-        return try {
-            val subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body.subject
-            subject.toString()
-        } catch (e: ExpiredJwtException) {
-            e.printStackTrace()
-            "Expired"
-        } catch (e: JwtException) {
-            e.printStackTrace()
-            "Invalid"
-        }
-    }
+    private fun getUserClaims(token: String?): Claims =
+        Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
 
 
     fun resolveToken(req: HttpServletRequest): String? {
@@ -130,8 +127,8 @@ class JwtTokenProvider (
         if(isLoggedOut(jwtToken) == true) return false
 
         return try {
-            val claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken)
-            return !claims.body.expiration.before(Date())
+            val claims = getUserClaims(jwtToken)
+            return !claims.expiration.before(Date())
         } catch (e: ExpiredJwtException) {
             e.printStackTrace()
             false
