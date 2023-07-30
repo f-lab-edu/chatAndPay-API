@@ -97,7 +97,7 @@ class JwtTokenProvider (
     }
 
     fun getAuthentication(token: String): Authentication {
-        val claims: Claims = getUserClaims(token)
+        val claims: Claims = getUserClaims(token) ?: throw RestApiException("잘못된 토큰입니다.")
 
         claims["cellphone"] ?: throw RestApiException("잘못된 토큰입니다.")
 
@@ -110,8 +110,15 @@ class JwtTokenProvider (
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 
-    private fun getUserClaims(token: String?): Claims =
-        Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
+    private fun getUserClaims(token: String?): Claims? {
+        return try {
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
+        } catch (e: JwtException) {
+            e.printStackTrace()
+            null
+        }
+    }
+
 
 
     fun resolveToken(req: HttpServletRequest): String? {
@@ -127,7 +134,7 @@ class JwtTokenProvider (
         if(isLoggedOut(jwtToken) == true) return false
 
         return try {
-            val claims = getUserClaims(jwtToken)
+            val claims = getUserClaims(jwtToken) ?: throw RestApiException("잘못된 토큰입니다.")
             return !claims.expiration.before(Date())
         } catch (e: ExpiredJwtException) {
             e.printStackTrace()
