@@ -115,7 +115,7 @@ class UserController(
     fun createUser(@RequestBody @Valid user: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val signupUser = userService.register(user)
-        val responseBody = signupUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = signupUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone) }
 
         return ResponseEntity.ok(responseBody)
 
