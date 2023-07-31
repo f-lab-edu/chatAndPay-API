@@ -7,7 +7,6 @@ import io.jsonwebtoken.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -55,10 +54,7 @@ class JwtTokenProvider (
 
         val findMember = userDetailsService.loadUserByUsername(userInfo)
 
-        val role = findMember.authorities.stream()
-                        .map { authority: GrantedAuthority? -> authority!!.authority }
-                        .findFirst()
-                        .orElseThrow{ RestApiException("토큰 발급 오류") }
+        val role = findMember.authorities.firstOrNull()?.authority ?: throw RestApiException("토큰 발급 오류")
 
         val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it, findMember.username) }
         val newRefreshToken = createRefreshToken()
