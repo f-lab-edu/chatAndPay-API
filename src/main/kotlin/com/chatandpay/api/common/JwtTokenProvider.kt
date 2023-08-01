@@ -130,7 +130,7 @@ class JwtTokenProvider (
         if(isLoggedOut(jwtToken) == true) return false
 
         return try {
-            val claims = getUserClaims(jwtToken) ?: throw RestApiException("잘못된 토큰입니다.")
+            val claims = getUserClaims(jwtToken) ?: throw JwtException("잘못된 토큰입니다.")
             return !claims.expiration.before(Date())
         } catch (e: ExpiredJwtException) {
             e.printStackTrace()
