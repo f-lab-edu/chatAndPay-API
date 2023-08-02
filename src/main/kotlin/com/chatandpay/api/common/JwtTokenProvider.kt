@@ -93,14 +93,14 @@ class JwtTokenProvider (
     }
 
     fun getAuthentication(token: String): Authentication {
-        val claims: Claims = getUserClaims(token) ?: throw RestApiException("잘못된 토큰입니다.")
+        val claims: Claims = getUserClaims(token) ?: throw JwtException("잘못된 토큰입니다.")
 
-        claims["cellphone"] ?: throw RestApiException("잘못된 토큰입니다.")
+        claims["cellphone"] ?: throw JwtException("잘못된 토큰입니다.")
 
         val userDetails = userDetailsService.loadUserByUsername(claims.subject)
 
         if(userDetails.username != claims["cellphone"]) {
-            throw RestApiException("잘못된 토큰입니다.")
+            throw JwtException("잘못된 토큰입니다.")
         }
 
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)

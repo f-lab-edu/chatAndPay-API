@@ -1,7 +1,6 @@
 package com.chatandpay.api.service
 
 import com.chatandpay.api.common.JwtTokenProvider
-import com.chatandpay.api.common.SecurityUser
 import com.chatandpay.api.common.UserRole
 import com.chatandpay.api.domain.User
 import com.chatandpay.api.domain.sms.SmsAuthentication
@@ -10,7 +9,7 @@ import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.repository.AuthRepository
 import com.chatandpay.api.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
@@ -76,6 +75,17 @@ class UserService(
         val refreshToken: String = jwtTokenProvider.createRefreshToken()
 
         saveTokenToRedis(findUser, accessToken, refreshToken)
+
+        return UserDTO.TokenInfo(accessToken, refreshToken)
+    }
+
+
+    fun tokenLoginUser(user: User) : UserDTO.TokenInfo {
+
+        val accessToken: String = jwtTokenProvider.createAccessToken(user.id, user.role, user.cellphone)
+        val refreshToken: String = jwtTokenProvider.createRefreshToken()
+
+        saveTokenToRedis(user, accessToken, refreshToken)
 
         return UserDTO.TokenInfo(accessToken, refreshToken)
     }
@@ -162,6 +172,7 @@ class UserService(
 
 
     @Transactional
+    @CacheEvict("member", key = "T(java.lang.String).valueOf(#id)")
     fun updateUser(id: Long, userRequest: UserDTO.UserRequestDTO) : User? {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
@@ -215,6 +226,7 @@ class UserService(
     }
 
     @Transactional
+    @CacheEvict("member", key = "T(java.lang.String).valueOf(#id)")
     fun deleteUser(id: Long) : Boolean {
 
         val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")

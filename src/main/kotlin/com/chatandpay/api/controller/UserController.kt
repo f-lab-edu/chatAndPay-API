@@ -122,9 +122,14 @@ class UserController(
     }
 
     @PatchMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
+    fun updateUser(@PathVariable("id") id: Long, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val updatedUser = userService.updateUser(id, userRequest)
+
+        val tokens = updatedUser?.let { userService.tokenLoginUser(it) }
+
+        CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
+
         val responseBody = updatedUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
         return ResponseEntity.ok(responseBody)
