@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor
 import javax.persistence.*
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import java.io.Serializable
 
 @Entity
 @Table(name = "member")
@@ -33,5 +34,5 @@ data class User (
     @Enumerated(EnumType.STRING)
     var role: UserRole
 
-): BaseEntity()
+): Serializable, BaseEntity()
 
