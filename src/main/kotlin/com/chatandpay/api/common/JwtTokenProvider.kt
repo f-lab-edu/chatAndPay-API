@@ -106,12 +106,15 @@ class JwtTokenProvider (
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 
-    private fun getUserClaims(token: String?): Claims? {
+    private fun getUserClaims(token: String?): Claims {
         return try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
+        } catch (e: SignatureException) {
+            throw JwtException("유효하지 않은 서명입니다.")
+        } catch (e: ExpiredJwtException) {
+            throw JwtException("만료된 토큰입니다.")
         } catch (e: JwtException) {
-            e.printStackTrace()
-            null
+            throw JwtException("잘못된 토큰입니다.")
         }
     }
 
@@ -130,14 +133,10 @@ class JwtTokenProvider (
         if(isLoggedOut(jwtToken) == true) return false
 
         return try {
-            val claims = getUserClaims(jwtToken) ?: throw JwtException("잘못된 토큰입니다.")
-            return !claims.expiration.before(Date())
-        } catch (e: ExpiredJwtException) {
-            e.printStackTrace()
-            false
+            val claims = getUserClaims(jwtToken)
+            !claims.expiration.before(Date())
         } catch (e: JwtException) {
-            e.printStackTrace()
-            false
+            throw JwtException(e.message)
         }
     }
 

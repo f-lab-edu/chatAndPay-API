@@ -40,8 +40,8 @@ class JwtAuthenticationFilter(
             }
 
             chain.doFilter(request, response)
-        } catch (ex: JwtException) {
-            val message = ex.message ?: ""
+        } catch (e: JwtException) {
+            val message = e.message ?: ""
             jwtExceptionHandler(response as HttpServletResponse, ErrorCode.BAD_REQUEST, message)
         }
 
