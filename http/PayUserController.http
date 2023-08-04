@@ -4,9 +4,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZXMiOiJBRE1JTiIsI
 Content-Type: application/json
 
 {
-    "ci" : "ci",
-    "user_id": 16,
-    "user_seq_no" : "userSeqNo",
+    "ci" : "xD7oMvFzLpJvGtXfYvXvJcCjZnGqHdIzYpZlXyDqYzDwFgKdLbZmLxMgZyYbEiKjXjMzQeRnIhPbKoXyDnTqNzIj",
+    "user_id": 2,
     "birth_date": "20230501"
 }
 

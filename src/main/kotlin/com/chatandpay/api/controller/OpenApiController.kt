@@ -4,12 +4,12 @@ import com.chatandpay.api.code.ErrorCode
 import com.chatandpay.api.common.ApiResponse
 import com.chatandpay.api.common.ErrorResponse
 import com.chatandpay.api.common.SuccessResponse
-import com.chatandpay.api.dto.InquiryRealNameDTO
-import com.chatandpay.api.dto.RealNameInquiryResponseDTO
+import com.chatandpay.api.dto.OpenApiDTO
 import com.chatandpay.api.service.OpenApiService
 import lombok.RequiredArgsConstructor
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/openapi")
@@ -33,7 +33,7 @@ class OpenApiController (val openApiService : OpenApiService) {
     }
 
     @PostMapping("/real_name")
-    fun getAccountRealName(@RequestBody inquiryDto: InquiryRealNameDTO): ResponseEntity<RealNameInquiryResponseDTO> {
+    fun getAccountRealName(@RequestBody @Valid inquiryDto: OpenApiDTO.RealNameInquiryRequestDTO): ResponseEntity<OpenApiDTO.RealNameInquiryResponseDTO> {
 
         val response = openApiService.getInquiryRealName(inquiryDto)
         return ResponseEntity.ok(response)

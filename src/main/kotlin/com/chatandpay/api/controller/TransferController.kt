@@ -6,6 +6,7 @@ import com.chatandpay.api.service.TransferService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/transfers")
@@ -16,7 +17,7 @@ class TransferController (
 
 
     @PostMapping("")
-    fun sendTransfer(@RequestBody request: ReceiveTransferRequestDTO): ResponseEntity<ReceiveTransferResponseDTO> {
+    fun sendTransfer(@RequestBody @Valid request: TransferDTO.ReceiveTransferRequestDTO): ResponseEntity<TransferDTO.ReceiveTransferResponseDTO> {
 
         val response = redissonLockFacade.sendTransfer(request)
         return ResponseEntity.ok(response)
@@ -25,7 +26,7 @@ class TransferController (
 
 
     @PostMapping("/{transfer_id}")
-    fun receiveTransfer(@PathVariable("transfer_id") id: UUID): ResponseEntity<SendTransferResponseDTO> {
+    fun receiveTransfer(@PathVariable("transfer_id") id: UUID): ResponseEntity<TransferDTO.SendTransferResponseDTO> {
 
         val response = transferService.receiveTransfer(id)
         return ResponseEntity.ok(response)
@@ -33,7 +34,7 @@ class TransferController (
     }
 
     @PostMapping("/interbank")
-    fun sendOtherBankTransfer(@RequestBody request: OtherBankTransferRequestDTO): ResponseEntity<OtherBankTransferResponseDTO> {
+    fun sendOtherBankTransfer(@RequestBody @Valid request: TransferDTO.OtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
 
         val response = transferService.sendOtherBankTransfer(request)
         return ResponseEntity.ok(response)
@@ -41,7 +42,7 @@ class TransferController (
     }
 
     @PostMapping("/registered")
-    fun sendMyOtherBankTransfer(@RequestBody request: RegOtherBankTransferRequestDTO): ResponseEntity<OtherBankTransferResponseDTO> {
+    fun sendMyOtherBankTransfer(@RequestBody @Valid request: TransferDTO.RegOtherBankTransferRequestDTO): ResponseEntity<TransferDTO.OtherBankTransferResponseDTO> {
 
         val response = transferService.sendMyOtherBankTransfer(request)
         return ResponseEntity.ok(response)
@@ -49,7 +50,7 @@ class TransferController (
     }
 
     @GetMapping("/pending/{sender}")
-    fun getPendingTransfers(@PathVariable("sender") id: Long) : ResponseEntity<List<PendingTransferDTO>> {
+    fun getPendingTransfers(@PathVariable("sender") id: Long) : ResponseEntity<List<TransferDTO.PendingTransferDTO>> {
 
         // TODO 로그인 유지 (세션 등) 구현 후 sender부 변경
         val response = transferService.getPendingTransfers(id)
@@ -59,7 +60,7 @@ class TransferController (
 
 
     @PostMapping("/change")
-    fun changePendingTransferState(@RequestBody request: ChangePendingTransferRequestDTO) : ResponseEntity<ChangePendingTransferResponseDTO> {
+    fun changePendingTransferState(@RequestBody @Valid request: TransferDTO.ChangePendingTransferRequestDTO) : ResponseEntity<TransferDTO.ChangePendingTransferResponseDTO> {
 
         val response = transferService.changePendingTransferState(request)
         return ResponseEntity.ok(response)

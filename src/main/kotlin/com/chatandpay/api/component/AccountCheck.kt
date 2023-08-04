@@ -24,31 +24,31 @@ class AccountCheck  (
     val accountService: AccountService,
 ){
 
-    fun chargeWallet(dto : DepositWalletRequestDTO) : DepositWalletResponseDTO {
+    fun chargeWallet(dto : AccountDTO.DepositWalletRequestDTO) : AccountDTO.DepositWalletResponseDTO {
 
         val payUser = accountRepository.findById(dto.accountId)?.payUser
                 ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
 
-        val openApiDto = OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
+        val openApiDto = OpenApiDTO.OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
         val outputMoney = openApiService.withdrawMoney(openApiDto)
 
         val response = accountService.chargeWallet(outputMoney)
         val userWallet = response.payUser.wallet?.money ?: throw EntityNotFoundException("지갑 조회 오류")
 
-        return DepositWalletResponseDTO(response.depositMoney, userWallet)
+        return AccountDTO.DepositWalletResponseDTO(response.depositMoney, userWallet)
 
     }
 
     @Transactional
-    fun saveAccount(dto: OtherBankAccountRequestDTO) : OtherBankAccountResponseDTO {
+    fun saveAccount(dto: AccountDTO.OtherBankAccountRequestDTO) : AccountDTO.OtherBankAccountResponseDTO {
 
-        val inquiry = InquiryRealNameDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
+        val inquiry = OpenApiDTO.RealNameInquiryRequestDTO("", dto.bankCode, dto.accountNumber, " ", "", "", dto.userId)
         val selectAccount = openApiService.getInquiryRealName(inquiry)
 
         val selectedUser = userRepository.findById(dto.userId) ?: throw IllegalArgumentException("존재하지 않는 유저입니다.")
         val selectedPayUser = selectedUser.id?.let { payUserRepository.findById(it) } ?: throw IllegalArgumentException("페이 서비스에 가입되어 있지 않은 유저입니다.")
 
-        BankCode.values().find { it.bankCode == dto.bankCode} ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
+        BankCode.values().find { it.bankCode == dto.bankCode } ?: throw IllegalArgumentException("존재하지 않는 뱅크 코드입니다.")
 
         val account = OtherBankAccount(null, dto.bankCode, dto.accountNumber, dto.accountName, dto.autoDebitAgree, selectedPayUser)
 
@@ -62,7 +62,12 @@ class AccountCheck  (
 
         val res = accountService.saveAccount(account) ?: throw RestApiException()
 
-        return OtherBankAccountResponseDTO(res.bankCode, res.accountNumber, res.accountName, res.autoDebitAgree)
+        return AccountDTO.OtherBankAccountResponseDTO(
+            res.bankCode,
+            res.accountNumber,
+            res.accountName,
+            res.autoDebitAgree
+        )
     }
 
 

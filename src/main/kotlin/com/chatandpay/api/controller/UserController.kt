@@ -12,7 +12,7 @@ import com.chatandpay.api.utils.CookieUtil
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletResponse
-
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/users")
@@ -22,11 +22,11 @@ class UserController(
 ) {
 
     @PostMapping("/login")
-    fun loginUser(@RequestBody user: UserDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
+    fun loginUser(@RequestBody @Valid user: UserDTO.UserLoginRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val loginUser = userService.login(user)
         val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
-        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
+        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
@@ -37,11 +37,11 @@ class UserController(
 
 
     @PostMapping("/token/login")
-    fun tokenLoginUser(@RequestBody requestBody: AuthLoginUserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
+    fun tokenLoginUser(@RequestBody @Valid requestBody: UserDTO.AuthTokenUserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
-        val loginUser = requestBody.email?.let { userService.emailLogin(it) }
-        val tokens = requestBody.email?.let { userService.tokenLoginUser(it) }
-        val responseBody = loginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
+        val loginUser = userService.emailLogin(requestBody.email)
+        val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
+        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
@@ -54,7 +54,7 @@ class UserController(
         response: HttpServletResponse,
         @CookieValue(value = "accessToken") accessToken: String,
         @CookieValue(value = "refreshToken") refreshToken: String,
-    ) : ResponseEntity<ValidRefreshTokenResponse>{
+    ) : ResponseEntity<UserDTO.ValidRefreshTokenResponse>{
 
         val tokens = jwtTokenProvider.regenerateToken(accessToken, refreshToken)
 
@@ -65,17 +65,17 @@ class UserController(
     }
 
     @PostMapping("/auth")
-    fun authLoginUser(@RequestBody requestBody: AuthLoginUserRequestDTO) : ResponseEntity<UserDTO>{
+    fun authLoginUser(@RequestBody @Valid requestBody: UserDTO.AuthLoginUserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
-        val authLoginUser = requestBody.cellphone?.let { userService.authLogin(it) }
-        val responseBody = authLoginUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val authLoginUser = requestBody.cellphone.let { userService.authLogin(it) }
+        val responseBody = authLoginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
     @PostMapping("/auth/signup")
-    fun authJoinUser(@RequestBody user: UserDTO) : ResponseEntity<SuccessResponse>{
+    fun authJoinUser(@RequestBody @Valid user: UserDTO.UserSMSRequestDTO) : ResponseEntity<SuccessResponse>{
 
         userService.authJoin(user) ?: throw RestApiException("인증 요청 중 오류가 발생하였습니다.")
 
@@ -86,7 +86,7 @@ class UserController(
     }
 
     @PostMapping("/auth/confirm")
-    fun confirmAuthLoginUser(@RequestBody saveObj : AuthConfirmRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO>{
+    fun confirmAuthLoginUser(@RequestBody @Valid saveObj : UserDTO.AuthConfirmRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val confirmedUser = userService.authLoginConfirm(saveObj)
 
@@ -94,7 +94,7 @@ class UserController(
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
-        val responseBody = confirmedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
+        val responseBody = confirmedUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         return ResponseEntity.ok(responseBody)
 
@@ -102,30 +102,30 @@ class UserController(
 
 
     @PostMapping("/auth/signup/confirm")
-    fun confirmAuthJoinUser(@RequestBody saveObj : AuthConfirmRequestDTO) : ResponseEntity<AuthConfirmResponseDTO>{
+    fun confirmAuthJoinUser(@RequestBody @Valid saveObj : UserDTO.AuthConfirmRequestDTO) : ResponseEntity<UserDTO.AuthConfirmResponseDTO>{
 
         val smsAuthentication = userService.authConfirm(saveObj)
-        val responseBody = smsAuthentication.id?.let { AuthConfirmResponseDTO(it) }
+        val responseBody = smsAuthentication.id?.let { UserDTO.AuthConfirmResponseDTO(it) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
     @PostMapping("/signup")
-    fun createUser(@RequestBody user: UserDTO) : ResponseEntity<UserDTO>{
+    fun createUser(@RequestBody @Valid user: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val signupUser = userService.register(user)
-        val responseBody = signupUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = signupUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
     @PatchMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long, @RequestBody userRequest: UserDTO) : ResponseEntity<UserDTO>{
+    fun updateUser(@PathVariable("id") id: Long, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val updatedUser = userService.updateUser(id, userRequest)
-        val responseBody = updatedUser?.let { UserDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = updatedUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
         return ResponseEntity.ok(responseBody)
 

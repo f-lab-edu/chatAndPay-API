@@ -26,7 +26,7 @@ class TransferService(
 ){
 
     @Transactional
-    fun sendTransfer(dto: ReceiveTransferRequestDTO, uuid: UUID) : ReceiveTransferResponseDTO? {
+    fun sendTransfer(dto: TransferDTO.ReceiveTransferRequestDTO, uuid: UUID) : TransferDTO.ReceiveTransferResponseDTO? {
 
         val findSendUser = payUserRepository.findById(dto.senderId) ?: throw EntityNotFoundException("송신자를 찾을 수 없습니다.")
         val findReceiveUser = payUserRepository.findById(dto.receiverId) ?: throw EntityNotFoundException("수신자를 찾을 수 없습니다.")
@@ -44,7 +44,7 @@ class TransferService(
         val savedTransfer = transferRepository.save(transferDto)
 
         return savedTransfer?.let {
-            ReceiveTransferResponseDTO(
+            TransferDTO.ReceiveTransferResponseDTO(
                 transferUuid = it.uuid,
                 sendingAmount = it.amount,
                 walletAmount = findSendUser.wallet?.money ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
@@ -54,7 +54,7 @@ class TransferService(
 
 
     @Transactional
-    fun receiveTransfer(uuid: UUID): SendTransferResponseDTO {
+    fun receiveTransfer(uuid: UUID): TransferDTO.SendTransferResponseDTO {
 
         val findTransferObj = transferRepository.findById(uuid) ?: throw EntityNotFoundException("송신 요청을 찾을 수 없습니다.")
 
@@ -77,12 +77,12 @@ class TransferService(
         val savedTransfer = transferRepository.save(findTransferObj)
         val amount = savedTransfer?.receiver?.wallet?.money ?: throw EntityNotFoundException("금액 수신에 실패했습니다.")
 
-        return SendTransferResponseDTO(savedTransfer.uuid, outputMoney, amount)
+        return TransferDTO.SendTransferResponseDTO(savedTransfer.uuid, outputMoney, amount)
     }
 
 
     @Transactional
-    fun sendMyOtherBankTransfer(dto: RegOtherBankTransferRequestDTO) : OtherBankTransferResponseDTO? {
+    fun sendMyOtherBankTransfer(dto: TransferDTO.RegOtherBankTransferRequestDTO) : TransferDTO.OtherBankTransferResponseDTO? {
 
         val findReceiveAccount = accountRepository.findById(dto.senderBankAccount) ?: throw EntityNotFoundException("수신 계좌를 찾을 수 없습니다.")
 
@@ -90,14 +90,19 @@ class TransferService(
             throw IllegalArgumentException("수신 계좌의 명의가 송신자의 계좌와 다릅니다.")
         }
 
-        val otherBankTransferRequest = OtherBankTransferRequestDTO(dto.senderId, findReceiveAccount.bankCode, findReceiveAccount.accountNumber, dto.amount)
+        val otherBankTransferRequest = TransferDTO.OtherBankTransferRequestDTO(
+            dto.senderId,
+            findReceiveAccount.bankCode,
+            findReceiveAccount.accountNumber,
+            dto.amount
+        )
 
         return sendOtherBankTransfer(otherBankTransferRequest)
     }
 
 
     @Transactional
-    fun sendOtherBankTransfer(dto: OtherBankTransferRequestDTO) : OtherBankTransferResponseDTO? {
+    fun sendOtherBankTransfer(dto: TransferDTO.OtherBankTransferRequestDTO) : TransferDTO.OtherBankTransferResponseDTO? {
 
         val findSendUser = payUserRepository.findById(dto.senderId) ?: throw EntityNotFoundException("송신자를 찾을 수 없습니다.")
         val findSenderWallet = findSendUser.wallet ?: throw EntityNotFoundException("송신자의 지갑을 찾을 수 없습니다.")
@@ -112,7 +117,7 @@ class TransferService(
 
         try {
             return finalizeOtherBankTransfer(transferDto, findSenderWallet)?.let {
-                OtherBankTransferResponseDTO(
+                TransferDTO.OtherBankTransferResponseDTO(
                     transferUuid = it.uuid,
                     isSucceeded = true,
                     sendingAmount = it.amount,
@@ -139,21 +144,21 @@ class TransferService(
 
 
 
-    fun getPendingTransfers(id: Long) : List<PendingTransferDTO> {
+    fun getPendingTransfers(id: Long) : List<TransferDTO.PendingTransferDTO> {
 
         val findUser = payUserRepository.findByUserId(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
         val countUndoneTransferList = transferRepository.findPendingTransfers(findUser)
-        val pendingTransferList : MutableList<PendingTransferDTO> = mutableListOf()
+        val pendingTransferList : MutableList<TransferDTO.PendingTransferDTO> = mutableListOf()
 
         for (i in countUndoneTransferList){
-            pendingTransferList += PendingTransferDTO(i.uuid, i.sender.id!!, i.receiver.id!!, i.amount)
+            pendingTransferList += TransferDTO.PendingTransferDTO(i.uuid, i.sender.id!!, i.receiver.id!!, i.amount)
         }
 
         return pendingTransferList.toList()
     }
 
     @Transactional
-    fun changePendingTransferState(changeReq: ChangePendingTransferRequestDTO) : ChangePendingTransferResponseDTO {
+    fun changePendingTransferState(changeReq: TransferDTO.ChangePendingTransferRequestDTO) : TransferDTO.ChangePendingTransferResponseDTO {
 
         val beforeTransfer = transferRepository.findById(changeReq.uuid) ?: throw EntityNotFoundException("UUID 입력이 잘못되었습니다.")
 
@@ -175,7 +180,7 @@ class TransferService(
         beforeTransfer.transferred = true
         transferRepository.save(beforeTransfer)
 
-        val returnDto = ChangePendingTransferResponseDTO(isSucceed = true, 0)
+        val returnDto = TransferDTO.ChangePendingTransferResponseDTO(isSucceed = true, 0)
         returnDto.remainPendingTransfer = transferRepository.findPendingTransfers(beforeTransfer.sender).size
 
         logModifyTransfer(changeReq, beforeTransfer, afterTransfer)
@@ -206,7 +211,7 @@ class TransferService(
         return transferRepository.save(transferDto) ?: throw RestApiException("송금 변경 실패")
     }
 
-    fun logModifyTransfer(changeReq: ChangePendingTransferRequestDTO, beforeTransfer: Transfer, afterTransfer: Transfer) {
+    fun logModifyTransfer(changeReq: TransferDTO.ChangePendingTransferRequestDTO, beforeTransfer: Transfer, afterTransfer: Transfer) {
         val log = TransferChangeLog(changeReq.uuid.toString(), afterTransfer.uuid.toString(), changeReq.changeType, true)
 
         when (changeReq.changeType) {

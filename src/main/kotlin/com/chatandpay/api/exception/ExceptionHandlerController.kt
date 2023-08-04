@@ -4,6 +4,7 @@ import com.chatandpay.api.code.ErrorCode
 import com.chatandpay.api.common.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.util.concurrent.TimeoutException
@@ -53,6 +54,14 @@ internal class ExceptionHandlerController {
         return handleExceptionInternal(errorCode)
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    protected fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse>? {
+        val errorEnum = ErrorCode.BAD_REQUEST
+        val errorMsg = methodArgumentNotValidErrorParser(ex)
+        val errorCode = ErrorResponse(errorEnum.value, errorMsg)
+        return handleExceptionInternal(errorCode)
+    }
+
 
     @ExceptionHandler(RestApiException::class, Exception::class)
     protected fun handleRestApiException(ex: RestApiException): ResponseEntity<ErrorResponse>? {
@@ -63,4 +72,10 @@ internal class ExceptionHandlerController {
         val httpStatus = errorResponse.getHttpStatus() ?: HttpStatus.INTERNAL_SERVER_ERROR
         return ResponseEntity.status(httpStatus).body(errorResponse)
     }
+
+    private fun methodArgumentNotValidErrorParser(ex: MethodArgumentNotValidException) : String {
+        val errors = ex.bindingResult.fieldErrors.mapNotNull{ "${it.field}: ${it.defaultMessage}"}
+        return errors.joinToString(", ")
+    }
+
 }

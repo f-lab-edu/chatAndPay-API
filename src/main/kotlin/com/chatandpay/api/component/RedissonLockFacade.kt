@@ -1,7 +1,6 @@
 package com.chatandpay.api.component
 
-import com.chatandpay.api.dto.ReceiveTransferRequestDTO
-import com.chatandpay.api.dto.ReceiveTransferResponseDTO
+import com.chatandpay.api.dto.TransferDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.TransferService
 import org.redisson.api.RLock
@@ -16,7 +15,7 @@ class RedissonLockFacade (
     private val transferService: TransferService
 ){
 
-    fun sendTransfer(request: ReceiveTransferRequestDTO) : ReceiveTransferResponseDTO? {
+    fun sendTransfer(request: TransferDTO.ReceiveTransferRequestDTO) : TransferDTO.ReceiveTransferResponseDTO? {
 
         val uuid = UUID.randomUUID()
         val lock: RLock = redissonClient.getLock("transfer")

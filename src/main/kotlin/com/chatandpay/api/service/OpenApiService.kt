@@ -66,7 +66,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
                 val res = rest.postForObject(
                     uri,
                     HttpEntity(param, headers),
-                    OpenApiAccessTokenDTO::class.java
+                    OpenApiDTO.OpenApiAccessTokenDTO::class.java
                     // TODO - 타 응답 반환 시 ResponceDTO 처리
                 ) ?: throw RestApiException("토큰 발급 실패")
 
@@ -82,7 +82,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         return token
     }
 
-    fun getInquiryRealName(inquiryDto : InquiryRealNameDTO) : RealNameInquiryResponseDTO {
+    fun getInquiryRealName(inquiryDto : OpenApiDTO.RealNameInquiryRequestDTO) : OpenApiDTO.RealNameInquiryResponseDTO {
 
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/inquiry/real_name")
@@ -109,7 +109,7 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
         val returnRestTemplate = rest.postForObject(
             uri,
             HttpEntity(jsonBody, headers),
-            RealNameInquiryResponseDTO::class.java
+            OpenApiDTO.RealNameInquiryResponseDTO::class.java
         ) ?: throw RestApiException("조회 실패")
 
         returnRestTemplate.bankRspCode?.let { checkBankRspCode(it) }
@@ -118,12 +118,12 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
     }
 
-    fun withdrawMoney(dto: OpenApiDepositWalletDTO) : OpenApiDepositWalletDTO {
+    fun withdrawMoney(dto: OpenApiDTO.OpenApiDepositWalletDTO) : OpenApiDTO.OpenApiDepositWalletDTO {
 
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
 
-        val testDTO = WithdrawMoneyResponseDTO(
+        val testDTO = OpenApiDTO.WithdrawMoneyResponseDTO(
             apiTranId = "2ffd133a-d17a-431d-a6a5",
             apiTranDtm = "20230910101921567",
             rspCode = "A0000",
@@ -165,12 +165,12 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
             val rspCodeCtnt = BankRspCode.values().find { it.bankRspCode == bankRspCode }
                 ?: when (type) {
-                    "W" -> throw WalletChargeAttemptException ("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.", dto as OpenApiDepositWalletDTO)
+                    "W" -> throw WalletChargeAttemptException ("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.", dto as OpenApiDTO.OpenApiDepositWalletDTO)
                     else -> throw IllegalArgumentException("$bankRspCode: 존재하지 않는 참가기관 응답코드입니다.")
                 }
 
             when (type) {
-                "W" -> throw WalletChargeAttemptException ("[대외계 에러]: ${rspCodeCtnt.msg}", dto as OpenApiDepositWalletDTO)
+                "W" -> throw WalletChargeAttemptException ("[대외계 에러]: ${rspCodeCtnt.msg}", dto as OpenApiDTO.OpenApiDepositWalletDTO)
                 else -> throw RestApiException("[대외계 에러]: ${rspCodeCtnt.msg}")
             }
 
