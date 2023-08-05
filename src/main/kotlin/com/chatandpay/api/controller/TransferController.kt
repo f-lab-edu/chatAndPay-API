@@ -28,7 +28,7 @@ class TransferController (
     @PostMapping("/{transfer_id}")
     fun receiveTransfer(@PathVariable("transfer_id") id: UUID): ResponseEntity<TransferDTO.SendTransferResponseDTO> {
 
-        val response = transferService.receiveTransfer(id)
+        val response = redissonLockFacade.receiveTransfer(id)
         return ResponseEntity.ok(response)
 
     }

@@ -34,10 +34,10 @@ class AccountRepository (
         return query.resultList.isNotEmpty()
     }
 
-    fun findByPayUserId(id: Long): List<OtherBankAccount>? {
+    fun findByPayUserId(id: Long): List<OtherBankAccount> {
         val query = entityManager.createQuery("SELECT a FROM OtherBankAccount a WHERE a.payUser.id = :id", OtherBankAccount::class.java)
         query.setParameter("id", id)
-        return query.resultList
+        return query.resultList ?: emptyList()
     }
 
     fun deleteAllAccount(userId: Long): Int{
