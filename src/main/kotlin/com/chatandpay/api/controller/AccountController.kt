@@ -21,7 +21,7 @@ class AccountController(
 ) {
 
     @GetMapping("")
-    fun getExternalAccount(@RequestParam userId: Long) : ResponseEntity<OtherBankAccountListResponseDTO> {
+    fun getExternalAccount(@RequestParam userId: Long) : ResponseEntity<AccountDTO.OtherBankAccountListResponseDTO> {
         // TODO RequestParam - Token 확인으로 변경
         val response = accountService.getExternalAccount(userId)
         return ResponseEntity.ok(response)

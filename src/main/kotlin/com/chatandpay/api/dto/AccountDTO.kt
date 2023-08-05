@@ -50,4 +50,20 @@ class AccountDTO {
         val walletAmount : Int
     ) : ApiResponse()
 
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    data class OtherBankAccountListResponseDTO (
+        val accountList: List<OtherBankAccountRawResponseDTO>
+    ): ApiResponse()
+
+
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
+    data class OtherBankAccountRawResponseDTO (
+        val bankCode: String,
+        val accountNumber: String,
+        val accountName: String,
+        val autoDebitAgree: String,
+    )
+
+
 }
