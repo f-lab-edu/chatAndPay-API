@@ -27,6 +27,7 @@ sens:
   access-key: ${api-keys.sens.access-key}
   secret-key: ${api-keys.sens.secret-key}
   sender-phone: ${api-keys.sens.sender-phone}
+  url: https://sens.apigw.ntruss.com
 openapi:
   client-id: ${api-keys.openapi.client-id}
   client-secret: ${api-keys.openapi.client-secret}

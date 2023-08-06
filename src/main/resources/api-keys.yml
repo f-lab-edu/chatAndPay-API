@@ -3,6 +3,7 @@ sens:
   access-key:
   secret-key:
   sender-phone:
+  url:
 openapi:
   client-id:
   client-secret:

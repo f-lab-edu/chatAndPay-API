@@ -1,0 +1,19 @@
+### 1. 네이버 SENS: SMS 송신
+POST http://localhost:9090/sms/v2/services/dev-id/messages HTTP/1.1
+Content-Type: application/json
+
+{
+  "type": "SMS",
+  "contentType": "COMM",
+  "countryCode": "82",
+  "from": "01012341234",
+  "content":"string",
+  "messages":[
+    {
+        "to":"string",
+        "subject":"string",
+        "content":"string"
+    }
+  ],
+  "messages": {"message"}
+}
