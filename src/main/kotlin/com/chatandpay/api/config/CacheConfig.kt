@@ -1,5 +1,6 @@
 package com.chatandpay.api.config
 
+import com.chatandpay.api.common.JwtTokenProvider.Companion.TOKEN_VALIDATION_SECOND
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
 import org.springframework.context.annotation.Bean
@@ -16,7 +17,7 @@ class CacheConfig {
     @Bean
     fun cacheManager(redisConnectionFactory: RedisConnectionFactory): CacheManager {
         val cacheConfigMap: Map<String, RedisCacheConfiguration> = mapOf(
-            "member" to RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(1000))
+            "member" to RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofSeconds(TOKEN_VALIDATION_SECOND))
         )
 
         return RedisCacheManager.builder(redisConnectionFactory)
@@ -24,4 +25,5 @@ class CacheConfig {
             .withInitialCacheConfigurations(cacheConfigMap)
             .build()
     }
+
 }
