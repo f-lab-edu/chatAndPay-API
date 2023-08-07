@@ -4,8 +4,9 @@ import com.chatandpay.api.domain.User
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.AuthorityUtils
 import org.springframework.security.core.userdetails.UserDetails
+import java.io.Serializable
 
-class SecurityUser(user: User) : UserDetails {
+class SecurityUser(user: User) : UserDetails, Serializable {
     private val user: User
 
     init {
@@ -16,7 +17,7 @@ class SecurityUser(user: User) : UserDetails {
 
     override fun getPassword() = user.password
 
-    override fun getUsername() = user.id.toString()
+    override fun getUsername() = user.cellphone
 
     override fun isAccountNonExpired() = true
 

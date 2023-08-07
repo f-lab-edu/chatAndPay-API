@@ -3,14 +3,10 @@ package com.chatandpay.api.common
 import com.chatandpay.api.dto.UserDTO
 import com.chatandpay.api.exception.RestApiException
 import com.chatandpay.api.service.RedisService
-import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.JwtException
-import io.jsonwebtoken.Jwts
-import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.*
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -58,12 +54,9 @@ class JwtTokenProvider (
 
         val findMember = userDetailsService.loadUserByUsername(userInfo)
 
-        val role = findMember.authorities.stream()
-                        .map { authority: GrantedAuthority? -> authority!!.authority }
-                        .findFirst()
-                        .orElseThrow{ RestApiException("토큰 발급 오류") }
+        val role = findMember.authorities.firstOrNull()?.authority ?: throw RestApiException("토큰 발급 오류")
 
-        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it) }
+        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it, findMember.username) }
         val newRefreshToken = createRefreshToken()
 
         invalidateToken(refreshToken, "refresh")
@@ -72,10 +65,11 @@ class JwtTokenProvider (
 
     }
 
-    fun createAccessToken(userPk: Long?, role: UserRole): String {
+    fun createAccessToken(userPk: Long?, role: UserRole, cellphone: String): String {
 
         val claims = Jwts.claims().setSubject(userPk.toString())
         claims["roles"] = role
+        claims["cellphone"] = cellphone
         val now = Date()
 
         return Jwts.builder()
@@ -98,23 +92,32 @@ class JwtTokenProvider (
 
     }
 
-    fun getAuthentication(token: String?): Authentication {
-        val userDetails = userDetailsService.loadUserByUsername(getUserPk(token))
+    fun getAuthentication(token: String): Authentication {
+        val claims: Claims = getUserClaims(token) ?: throw JwtException("잘못된 토큰입니다.")
+
+        claims["cellphone"] ?: throw JwtException("잘못된 토큰입니다.")
+
+        val userDetails = userDetailsService.loadUserByUsername(claims.subject)
+
+        if(userDetails.username != claims["cellphone"]) {
+            throw JwtException("잘못된 토큰입니다.")
+        }
+
         return UsernamePasswordAuthenticationToken(userDetails, "", userDetails.authorities)
     }
 
-    fun getUserPk(token: String?): String {
+    private fun getUserClaims(token: String?): Claims {
         return try {
-            val subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body.subject
-            subject.toString()
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).body
+        } catch (e: SignatureException) {
+            throw JwtException("유효하지 않은 서명입니다.")
         } catch (e: ExpiredJwtException) {
-            e.printStackTrace()
-            "Expired"
+            throw JwtException("만료된 토큰입니다.")
         } catch (e: JwtException) {
-            e.printStackTrace()
-            "Invalid"
+            throw JwtException("잘못된 토큰입니다.")
         }
     }
+
 
 
     fun resolveToken(req: HttpServletRequest): String? {
@@ -130,14 +133,10 @@ class JwtTokenProvider (
         if(isLoggedOut(jwtToken) == true) return false
 
         return try {
-            val claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken)
-            return !claims.body.expiration.before(Date())
-        } catch (e: ExpiredJwtException) {
-            e.printStackTrace()
-            false
+            val claims = getUserClaims(jwtToken)
+            !claims.expiration.before(Date())
         } catch (e: JwtException) {
-            e.printStackTrace()
-            false
+            throw JwtException(e.message)
         }
     }
 
