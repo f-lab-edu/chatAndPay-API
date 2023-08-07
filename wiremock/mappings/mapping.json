@@ -1,19 +1,70 @@
 {
-    "request": {
-      "method": "POST",
-      "url": "/sms/v2/services/dev-id/messages"
+  "mappings": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "/sms/v2/services/dev-id/messages"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody":  {
+          "statusCode": "200",
+          "statusName": "OK",
+          "requestId": "requestId",
+          "requestTime": "2023-08-06T12:34:56Z"
+        },
+        "transformers": ["json-extractor"]
+      }
     },
-    "response": {
-      "status": 200,
-      "headers": {
-        "Content-Type": "application/json"
+    {
+      "request": {
+        "method": "POST",
+        "url": "/oauth/2.0/token"
       },
-      "jsonBody":  {
-        "statusCode": "200",
-        "statusName": "OK",
-        "requestId": "requestId",
-        "requestTime": "2023-08-06T12:34:56Z"
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJNMjAyMzAxMjM0Iiwic2NvcGUiOlsib29iIl0sImlzcyI6Imh0dHBzOi8vd3d3Lm9wZW5iYW5raW5nLm9yLmtyIiwiZXhwIjoxNjkzOTA4MzY3LCJqdGkiOiJhMzZlZTE3ZC0zYjM0LTEyMzQtYWJjZC1hYzEyMzRjNTY3OGMifQ.JNO5GybEav8WIsxlOO4U6J8lA1QtPqm1e4AlcICQI64",
+          "token_type": "bearer",
+          "expires_in": "7775999",
+          "scope": "oob",
+          "client_use_code": "M202301234"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/v2.0/inquiry/real_name"
       },
-      "transformers": ["json-extractor"]
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"api_tran_id\": \"2ffd133a-d17a-431d-a6a5\", \"api_tran_dtm\": \"20190910101921567\", \"rsp_code\": \"A0000\", \"rsp_message\": \"\", \"bank_tran_id\": \"${$.bank_tran_id}\", \"bank_tran_date\": \"${$.tran_dtime}\", \"bank_code_tran\": \"${$.bank_tran_id}\", \"bank_rsp_code\": \"000\", \"bank_rsp_message\": \"\", \"bank_code_std\": \"${$.bank_code_std}\", \"bank_code_sub\": \"1230001\", \"bank_name\": \"오픈은행\", \"account_num\": \"${$.account_num}\", \"account_holder_info_type\": \"${$.account_holder_info_type}\", \"account_holder_info\": \"${$.account_holder_info}\", \"account_holder_name\": \"홍길동\", \"account_type\": \"1\" }",
+        "transformers": ["json-extractor"]
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/v2.0/transfer/withdraw/acnt_num"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": "{\"account_alias\": \"급여계좌\", \"account_holder_name\": \"${$.req_client_name}\", \"account_num\": \"${$.wd_account_num}\", \"account_num_masked\": \"${$.wd_account_num}\", \"api_tran_dtm\": \"${$.tran_dtime}\", \"api_tran_id\": \"2ffd133a-d17a-431d-a6a5\", \"bank_code_std\": \"${$.wd_bank_code_std}\", \"bank_code_sub\": \"1230001\", \"bank_name\": \"오픈은행\", \"bank_rsp_code\": \"000\", \"bank_rsp_message\": \"\", \"bank_tran_date\": \"${$.tran_dtime}\", \"bank_tran_id\": \"${$.bank_tran_id}\", \"dps_account_holder_name\": \"${$.recv_client_name}\", \"dps_account_num_masked\": \"${$.recv_client_account_num}\", \"dps_bank_code_std\": \"${$.recv_client_bank_code}\", \"dps_bank_code_sub\": \"1230001\", \"dps_bank_name\": \"오픈은행\", \"dps_print_content\": \"입금계좌인자내역\", \"print_content\": \"출금계좌인자내역\", \"rsp_code\": \"A0000\", \"rsp_message\": \"\", \"tran_amt\": \"${$.tran_amt}\", \"wd_limit_remain_amt\": \"${100000-$.tran_amt}\"}",
+        "transformers": ["json-extractor"]
+      }
     }
+  ]
 }
