@@ -20,7 +20,7 @@ class PayUserService(
 ) {
 
     @Transactional
-    fun register(payUser : PayUserDTO.SignUpRequestPayUserDTO): PayUserDTO.SignUpResponsePayUserDTO? {
+    fun register(payUser: PayUserDTO.SignUpRequestPayUserDTO): PayUserDTO.SignUpResponsePayUserDTO? {
 
         val findUser = payUserRepository.findByCi(payUser.ci)
 
@@ -42,6 +42,14 @@ class PayUserService(
         savedUser.wallet = walletRepository.save(wallet) ?: throw RestApiException("페이 회원 가입에 실패하였습니다.")
 
         return savedUser.id?.let { PayUserDTO.SignUpResponsePayUserDTO(user.name, user.cellphone, it, savedUser.userSeqNo, savedUser.birthDate) }
+
+    }
+
+    @Transactional
+    fun withdrawPayService(ulid: String) : Boolean {
+
+        val findUserId = userRepository.findByUlid(ulid)?.id ?: throw EntityNotFoundException("ulid 입력이 잘못되었습니다.")
+        return this.withdrawPayService(findUserId)
 
     }
 

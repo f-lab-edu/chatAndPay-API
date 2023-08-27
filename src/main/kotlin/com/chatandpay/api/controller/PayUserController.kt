@@ -26,10 +26,10 @@ class PayUserController(val payUserService: PayUserService)  {
     }
 
 
-    @DeleteMapping("/{id}")
-    fun withdrawPayService(@PathVariable("id") id: Long): ResponseEntity<ApiResponse> {
+    @DeleteMapping("/{ulid}")
+    fun withdrawPayService(@PathVariable("ulid") ulid: String): ResponseEntity<ApiResponse> {
 
-        val deletedYn = payUserService.withdrawPayService(id)
+        val deletedYn = payUserService.withdrawPayService(ulid)
 
         return if (deletedYn) {
             val successResponse = SuccessResponse("탈퇴 완료")
