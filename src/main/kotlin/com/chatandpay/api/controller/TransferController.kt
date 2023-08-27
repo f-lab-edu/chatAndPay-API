@@ -50,10 +50,9 @@ class TransferController (
     }
 
     @GetMapping("/pending/{sender}")
-    fun getPendingTransfers(@PathVariable("sender") id: Long) : ResponseEntity<List<TransferDTO.PendingTransferDTO>> {
+    fun getPendingTransfers(@PathVariable("sender") ulid: String) : ResponseEntity<List<TransferDTO.PendingTransferDTO>> {
 
-        // TODO 로그인 유지 (세션 등) 구현 후 sender부 변경
-        val response = transferService.getPendingTransfers(id)
+        val response = transferService.getPendingTransfers(ulid)
         return ResponseEntity.ok(response)
 
     }

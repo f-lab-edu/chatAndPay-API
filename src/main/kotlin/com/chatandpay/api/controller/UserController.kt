@@ -122,7 +122,7 @@ class UserController(
     }
 
     @PatchMapping("/{ulid}")
-    fun updateUser(@PathVariable("ulid") ulid: String, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
+    fun updateUser(@PathVariable("ulid") ulid: String, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val updatedUser = userService.updateUser(ulid, userRequest)
 
