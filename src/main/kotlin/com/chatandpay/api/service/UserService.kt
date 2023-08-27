@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import javax.persistence.EntityNotFoundException
 import javax.transaction.Transactional
+import de.huxhorn.sulky.ulid.ULID
 
 @Service
 class UserService(
@@ -29,7 +30,6 @@ class UserService(
 
     @Autowired
     lateinit var smsService: SmsService
-
 
     @Transactional
     fun register(user : UserDTO.UserRequestDTO): User? {
@@ -48,7 +48,8 @@ class UserService(
             throw IllegalArgumentException("휴대폰 인증이 진행되지 않았습니다.")
         }
 
-        val regUser = User(name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId, role = UserRole.USER)
+        val ulid = ULID().nextULID()
+        val regUser = User(ulid = ulid.toString(), name = user.name, password = "", userId= "", cellphone = user.cellphone, verificationId = user.verificationId, role = UserRole.USER)
         return userRepository.save(regUser)
     }
 
@@ -70,6 +71,7 @@ class UserService(
 
         val findUser = userRepository.findById(id)
             ?: throw EntityNotFoundException("해당 사용자가 없습니다.")
+        val findUserId = findUser.id ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
         val accessToken: String = jwtTokenProvider.createAccessToken(findUser.id, findUser.role, findUser.cellphone)
         val refreshToken: String = jwtTokenProvider.createRefreshToken()
@@ -173,19 +175,20 @@ class UserService(
 
     @Transactional
     @CacheEvict("member", key = "T(java.lang.String).valueOf(#id)")
-    fun updateUser(id: Long, userRequest: UserDTO.UserRequestDTO) : User? {
+    fun updateUser(ulid: String, userRequest: UserDTO.UserRequestDTO) : User? {
 
-        val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val findUser = userRepository.findByUlid(ulid) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val findUserId = findUser.id ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
         if (!userRequest.userId.isNullOrEmpty()
-            && userRequest.userId?.let { userRepository.existsByUserIdAndIdNot(it, id) } == true){
+            && userRequest.userId?.let { userRepository.existsByUserIdAndIdNot(it, findUserId) } == true){
             throw IllegalArgumentException("이미 존재하는 아이디입니다.")
         }
 
 
         if(findUser.cellphone != userRequest.cellphone) {
 
-            if (userRepository.existsByCellphoneAndIdNot(userRequest.cellphone, id)){
+            if (userRepository.existsByCellphoneAndIdNot(userRequest.cellphone, findUserId)){
                 throw IllegalArgumentException("이미 존재하는 전화번호입니다.")
             }
 
@@ -227,13 +230,14 @@ class UserService(
 
     @Transactional
     @CacheEvict("member", key = "T(java.lang.String).valueOf(#id)")
-    fun deleteUser(id: Long) : Boolean {
+    fun deleteUser(ulid: String) : Boolean {
 
-        val findUser = userRepository.findById(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val findUser = userRepository.findByUlid(ulid) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val findUserId = findUser.id ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
 
         try {
-            if(payUserService.isPayUser(id)) {
-                payUserService.withdrawPayService(id)
+            if(payUserService.isPayUser(findUserId)) {
+                payUserService.withdrawPayService(findUserId)
             }
             return userRepository.delete(findUser)
         } catch (e : Exception) {

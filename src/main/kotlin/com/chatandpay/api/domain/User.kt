@@ -32,7 +32,9 @@ data class User (
     @Column(nullable = false)
     var verificationId: Long,
     @Enumerated(EnumType.STRING)
-    var role: UserRole
+    var role: UserRole,
+    @Column(nullable = false)
+    var ulid: String,
 
 ): Serializable, BaseEntity()
 
