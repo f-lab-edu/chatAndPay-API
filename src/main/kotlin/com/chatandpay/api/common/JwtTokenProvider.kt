@@ -43,20 +43,18 @@ class JwtTokenProvider (
             throw RestApiException("accessToken 만료 전 요청 - refreshToken을 폐기합니다.")
         }
 
-        val userPk = redisService.getStringValue(refreshToken)[0]
+        val userULID = redisService.getStringValue(refreshToken)[0]
 
         if (findInfo.size < 2) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
         val userInfo = findInfo[0] as? String
-        val userInfoLong = userInfo?.toLongOrNull() ?: throw RestApiException("유효한 토큰이 아닙니다.")
-
-        if (userPk != userInfo) { throw RestApiException("유효한 토큰이 아닙니다.") }
+        if (userULID != userInfo) { throw RestApiException("유효한 토큰이 아닙니다.") }
 
         val findMember = userDetailsService.loadUserByUsername(userInfo)
 
         val role = findMember.authorities.firstOrNull()?.authority ?: throw RestApiException("토큰 발급 오류")
 
-        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfoLong, it, findMember.username) }
+        val newAccessToken  = UserRole.findByRoleName(role)?.let { createAccessToken(userInfo, it, findMember.username) }
         val newRefreshToken = createRefreshToken()
 
         invalidateToken(refreshToken, "refresh")
@@ -65,9 +63,9 @@ class JwtTokenProvider (
 
     }
 
-    fun createAccessToken(userPk: Long?, role: UserRole, cellphone: String): String {
+    fun createAccessToken(ulid: String, role: UserRole, cellphone: String): String {
 
-        val claims = Jwts.claims().setSubject(userPk.toString())
+        val claims = Jwts.claims().setSubject(ulid)
         claims["roles"] = role
         claims["cellphone"] = cellphone
         val now = Date()

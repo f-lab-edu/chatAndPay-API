@@ -13,9 +13,9 @@ class SecurityUserDetailService(
     private val userRepository: UserRepository
 ) : UserDetailsService {
 
-    @Cacheable("member", key = "#id")
-    override fun loadUserByUsername(id: String): UserDetails {
-        val member = userRepository.findById(id.toLong())
+    @Cacheable("member", key = "#ulid")
+    override fun loadUserByUsername(ulid: String): UserDetails {
+        val member = userRepository.findByUlid(ulid)
         if (member != null) {
             return SecurityUser(member)
         } else {
