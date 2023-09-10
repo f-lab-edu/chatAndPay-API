@@ -17,6 +17,7 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
+	maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -31,6 +32,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-cache")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("com.github.guepardoapps:kulid:2.0.0.0")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.apache.httpcomponents:httpclient")
 	implementation("com.querydsl:querydsl-jpa:5.0.0")
