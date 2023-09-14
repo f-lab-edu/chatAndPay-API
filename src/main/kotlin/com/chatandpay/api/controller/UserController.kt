@@ -26,7 +26,7 @@ class UserController(
 
         val loginUser = userService.login(user)
         val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
-        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
+        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(ulid = it.ulid, name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
@@ -41,7 +41,7 @@ class UserController(
 
         val loginUser = userService.emailLogin(requestBody.email)
         val tokens = loginUser?.id?.let { userService.tokenLoginUser(it) }
-        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
+        val responseBody = loginUser?.let { UserDTO.UserResponseDTO(ulid = it.ulid, name = it.name, cellphone = it.cellphone, email = it.email, accessToken = tokens?.accessToken) }
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
@@ -68,7 +68,7 @@ class UserController(
     fun authLoginUser(@RequestBody @Valid requestBody: UserDTO.AuthLoginUserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val authLoginUser = requestBody.cellphone.let { userService.authLogin(it) }
-        val responseBody = authLoginUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = authLoginUser?.let { UserDTO.UserResponseDTO(ulid= it.ulid, name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
         return ResponseEntity.ok(responseBody)
 
@@ -94,7 +94,7 @@ class UserController(
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
-        val responseBody = confirmedUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
+        val responseBody = confirmedUser?.let { UserDTO.UserResponseDTO(ulid= it.ulid, name = it.name, cellphone = it.cellphone, userId = it.userId, accessToken = tokens?.accessToken) }
 
         return ResponseEntity.ok(responseBody)
 
@@ -115,32 +115,32 @@ class UserController(
     fun createUser(@RequestBody @Valid user: UserDTO.UserRequestDTO) : ResponseEntity<UserDTO.UserResponseDTO>{
 
         val signupUser = userService.register(user)
-        val responseBody = signupUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone) }
+        val responseBody = signupUser?.let { UserDTO.UserResponseDTO(ulid= it.ulid, name = it.name, cellphone = it.cellphone) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
-    @PatchMapping("/{id}")
-    fun updateUser(@PathVariable("id") id: Long, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
+    @PatchMapping("/{ulid}")
+    fun updateUser(@PathVariable("ulid") ulid: String, @RequestBody @Valid userRequest: UserDTO.UserRequestDTO, response: HttpServletResponse) : ResponseEntity<UserDTO.UserResponseDTO>{
 
-        val updatedUser = userService.updateUser(id, userRequest)
+        val updatedUser = userService.updateUser(ulid, userRequest)
 
         val tokens = updatedUser?.let { userService.tokenLoginUser(it) }
 
         CookieUtil.addTokenCookies(tokens?.accessToken, tokens?.refreshToken, response)
 
-        val responseBody = updatedUser?.let { UserDTO.UserResponseDTO(name = it.name, cellphone = it.cellphone, userId = it.userId) }
+        val responseBody = updatedUser?.let { UserDTO.UserResponseDTO(ulid= it.ulid, name = it.name, cellphone = it.cellphone, userId = it.userId) }
 
         return ResponseEntity.ok(responseBody)
 
     }
 
 
-    @DeleteMapping("/{id}")
-    fun deleteUser(@PathVariable("id") id: Long): ResponseEntity<ApiResponse>{
+    @DeleteMapping("/{ulid}")
+    fun deleteUser(@PathVariable("ulid") ulid: String): ResponseEntity<ApiResponse>{
 
-        val deletedYn = userService.deleteUser(id)
+        val deletedYn = userService.deleteUser(ulid)
 
         return if (deletedYn) {
             val successResponse = SuccessResponse("탈퇴 완료")

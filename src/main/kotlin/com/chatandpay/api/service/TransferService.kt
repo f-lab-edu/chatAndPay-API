@@ -6,10 +6,7 @@ import com.chatandpay.api.config.Constant.Companion.MASTER_PAY_USER_CI
 import com.chatandpay.api.domain.*
 import com.chatandpay.api.dto.*
 import com.chatandpay.api.exception.RestApiException
-import com.chatandpay.api.repository.AccountRepository
-import com.chatandpay.api.repository.PayUserRepository
-import com.chatandpay.api.repository.TransferRepository
-import com.chatandpay.api.repository.WalletRepository
+import com.chatandpay.api.repository.*
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.persistence.EntityNotFoundException
@@ -17,6 +14,7 @@ import javax.transaction.Transactional
 
 @Service
 class TransferService(
+    private val userRepository: UserRepository,
     private val payUserRepository: PayUserRepository,
     private val walletRepository: WalletRepository,
     private val transferRepository: TransferRepository,
@@ -144,10 +142,11 @@ class TransferService(
 
 
 
-    fun getPendingTransfers(id: Long) : List<TransferDTO.PendingTransferDTO> {
+    fun getPendingTransfers(ulid: String) : List<TransferDTO.PendingTransferDTO> {
 
-        val findUser = payUserRepository.findByUserId(id) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
-        val countUndoneTransferList = transferRepository.findPendingTransfers(findUser)
+        val findUserId = userRepository.findByUlid(ulid)?.id ?: throw EntityNotFoundException("ULID 입력이 잘못되었습니다.")
+        val findPayUser = payUserRepository.findByUserId(findUserId) ?: throw EntityNotFoundException("IDX 입력이 잘못되었습니다.")
+        val countUndoneTransferList = transferRepository.findPendingTransfers(findPayUser)
         val pendingTransferList : MutableList<TransferDTO.PendingTransferDTO> = mutableListOf()
 
         for (i in countUndoneTransferList){

@@ -28,6 +28,12 @@ class UserRepository {
         return query.resultList.firstOrNull()
     }
 
+    fun findByUlid(ulid: String) : User? {
+        val query = entityManager.createQuery("SELECT u FROM User u WHERE u.ulid = :ulid", User::class.java)
+        query.setParameter("ulid", ulid)
+        return query.resultList.firstOrNull()
+    }
+
     fun findByUserId(userId: String) : User? {
         val query = entityManager.createQuery("SELECT u FROM User u WHERE u.userId = :userId", User::class.java)
         query.setParameter("userId", userId)

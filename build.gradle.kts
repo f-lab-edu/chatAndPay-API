@@ -17,6 +17,7 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 
 repositories {
 	mavenCentral()
+	maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -38,6 +39,7 @@ dependencies {
 	implementation("javax.annotation:javax.annotation-api:1.3.2")
 	implementation("javax.persistence:javax.persistence-api:2.2")
 	implementation("io.jsonwebtoken:jjwt:0.9.1")
+	implementation("de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.2.0")
 	implementation(group = "org.springframework.boot", name = "spring-boot-starter-data-redis", version = "2.4.10")
 	annotationProcessor(group = "com.querydsl", name = "querydsl-apt", classifier = "jpa")
 	kapt("com.querydsl:querydsl-apt:5.0.0:jpa")

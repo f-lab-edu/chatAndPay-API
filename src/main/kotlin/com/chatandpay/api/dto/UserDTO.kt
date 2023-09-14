@@ -36,6 +36,7 @@ class UserDTO {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
     data class UserResponseDTO(
 
+        var ulid: String,
         var name: String,
         var cellphone: String,
         var email: String? = null,
