@@ -30,9 +30,10 @@ class AccountCheck  (
                 ?: throw EntityNotFoundException("대외 계좌 IDX 입력 오류")
 
         val openApiDto = OpenApiDTO.OpenApiDepositWalletDTO(dto.depositMoney, dto.accountId, payUser)
-        val outputMoney = openApiService.withdrawMoney(openApiDto)
 
-        val response = accountService.chargeWallet(outputMoney)
+        openApiService.withdrawMoney(openApiDto)
+
+        val response = accountService.chargeWallet(openApiDto)
         val userWallet = response.payUser.wallet?.money ?: throw EntityNotFoundException("지갑 조회 오류")
 
         return AccountDTO.DepositWalletResponseDTO(response.depositMoney, userWallet)

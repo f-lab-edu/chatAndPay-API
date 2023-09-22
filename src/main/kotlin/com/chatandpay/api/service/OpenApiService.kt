@@ -10,6 +10,7 @@ import com.chatandpay.api.repository.PayUserRepository
 import com.chatandpay.api.utils.RandomUtil
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.stereotype.Service
@@ -118,45 +119,34 @@ class OpenApiService(val accessTokenRepository: AccessTokenRepository, val payUs
 
     }
 
-    fun withdrawMoney(dto: OpenApiDTO.OpenApiDepositWalletDTO) : OpenApiDTO.OpenApiDepositWalletDTO {
+    fun withdrawMoney(dto: OpenApiDTO.OpenApiDepositWalletDTO) : OpenApiDTO.WithdrawMoneyResponseDTO {
 
         val rest = RestTemplate()
         val uri = URI.create("$url/v2.0/transfer/withdraw/acnt_num")
 
-        val testDTO = OpenApiDTO.WithdrawMoneyResponseDTO(
-            apiTranId = "2ffd133a-d17a-431d-a6a5",
-            apiTranDtm = "20230910101921567",
-            rspCode = "A0000",
-            rspMessage = "",
-            dpsBankCodeStd = "097",
-            dpsBankCodeSub = "1230001",
-            dpsBankName = "오픈은행",
-            dpsAccountNumMasked = "000-1230000-***",
-            dpsPrintContent = "입금계좌인자내역",
-            dpsAccountHolderName = "허균",
-            bankTranId = "F123456789U4BC34239Z",
-            bankTranDate = "20190910",
-            bankCodeTran = "097",
-            bankRspCode = "000",
-            bankRspMessage = "",
-            fintechUseNum = "123456789012345678901234",
-            accountAlias = "급여계좌",
-            bankCodeStd = "097",
-            bankCodeSub = "1230001",
-            bankName = "오픈은행",
-            savingsBankName = "",
-            accountNumMasked = "000-1230000-***",
-            printContent = "출금계좌인자내역",
-            accountHolderName = "홍길동",
-            tranAmt = "10000",
-            wdLimitRemainAmt = "9990000"
-        )
+        val token = getOpenApiAccessToken()?.accessToken
 
-        // TODO token 종류 상이함으로 인한 임시 서버 설정 필요
+        val headers = HttpHeaders()
+        headers.set("Authorization", "Bearer$token")
+        headers.contentType = MediaType.APPLICATION_JSON
+        headers.acceptCharset = listOf(Charset.forName("UTF-8"))
 
-        checkBankRspCode(testDTO.bankRspCode, "W", dto)
+        val objectMapper = ObjectMapper().apply {
+            propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+            registerModule(JavaTimeModule())
+        }
 
-        return dto
+        val jsonBody = objectMapper.writeValueAsString(dto)
+
+        val returnRestTemplate = rest.postForObject(
+            uri,
+            HttpEntity(jsonBody, headers),
+            OpenApiDTO.WithdrawMoneyResponseDTO::class.java
+        ) ?: throw RestApiException("조회 실패")
+
+        checkBankRspCode(returnRestTemplate.bankRspCode, "W", dto)
+
+        return returnRestTemplate
     }
 
     fun checkBankRspCode(bankRspCode: String, type: String? = null, dto: Any? = null) {

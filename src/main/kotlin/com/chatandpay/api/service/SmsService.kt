@@ -46,6 +46,9 @@ class SmsService(private val authRepository: AuthRepository) {
     @Value("\${sens.sender-phone}")
     private val senderPhone: String? = null
 
+    @Value("\${sens.url}")
+    private val url: String? = null
+
 
     @Throws(RestApiException::class)
     @Transactional
@@ -58,7 +61,7 @@ class SmsService(private val authRepository: AuthRepository) {
         val smsAuth = SmsAuthentication(null, sixDigits, cellphone)
 
         val auth = authRepository.save(smsAuth)
-        //sendSms(message) ?: throw RestApiException("메시지 발송 실패")
+        sendSms(message) ?: throw RestApiException("메시지 발송 실패")
         println("============== message ================")
         println(message)
         println("============== message ================")
@@ -123,7 +126,7 @@ class SmsService(private val authRepository: AuthRepository) {
         restTemplate.requestFactory = HttpComponentsClientHttpRequestFactory()
 
         return restTemplate.postForObject(
-            URI("https://sens.apigw.ntruss.com/sms/v2/services/$serviceId/messages"), httpBody,
+            URI("${url}/sms/v2/services/$serviceId/messages"), httpBody,
             SmsResponse::class.java
         )
     }

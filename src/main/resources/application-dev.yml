@@ -7,3 +7,14 @@ spring:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
   hibernate:
     ddl-auto: create
+sens:
+  service-id: dev-id
+  access-key: dev-access-key
+  secret-key: dev-secret-key
+  sender-phone: sender-phone
+  url: http://localhost:9090
+openapi:
+  client-id: dev-client-id
+  client-secret: dev-client-secret
+  url: http://localhost:9090
+  institution-code: dev-institution-code
